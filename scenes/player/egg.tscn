@@ -1,17 +1,31 @@
-[gd_scene load_steps=3 format=3 uid="uid://h17puraebncd"]
+[gd_scene load_steps=5 format=3 uid="uid://h17puraebncd"]
 
 [ext_resource type="Texture2D" uid="uid://cii47wtsuo8q1" path="res://assets/graphics/egg_img.png" id="1_60cwx"]
+[ext_resource type="Texture2D" uid="uid://cwoo5r88f5cqs" path="res://assets/graphics/jetpack_left.png" id="2_0nht5"]
+[ext_resource type="Texture2D" uid="uid://c1rww8piheekw" path="res://assets/graphics/jetpack_right.png" id="3_eb0g5"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6upkn"]
-radius = 376.0
-height = 866.0
+radius = 110.0
+height = 262.0
 
-[node name="egg" type="RigidBody2D"]
+[node name="Egg" type="RigidBody2D"]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_60cwx")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -20)
+position = Vector2(5, -1)
 shape = SubResource("CapsuleShape2D_6upkn")
 one_way_collision_margin = 0.0
+
+[node name="JetpackLeft" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="JetpackLeft"]
+position = Vector2(-150, 80)
+texture = ExtResource("2_0nht5")
+
+[node name="JetpackRight" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="JetpackRight"]
+position = Vector2(150, 80)
+texture = ExtResource("3_eb0g5")
