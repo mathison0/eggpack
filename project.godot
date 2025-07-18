@@ -11,5 +11,5 @@ config_version=5
 [application]
 
 config/name="eggpack"
-run/main_scene="uid://h17puraebncd"
+run/main_scene="uid://bwckb05ota23m"
 config/features=PackedStringArray("4.4", "Forward Plus")

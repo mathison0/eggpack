@@ -1,9 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://bwckb05ota23m"]
+[gd_scene load_steps=3 format=3 uid="uid://bwckb05ota23m"]
 
 [ext_resource type="PackedScene" uid="uid://h17puraebncd" path="res://scenes/player/egg.tscn" id="2_y0acb"]
+[ext_resource type="TileSet" uid="uid://btalv436tnmlj" path="res://assets/graphics/tiles/ground_tileset.tres" id="3_u81e1"]
 
 [node name="Main" type="Node2D"]
 
 [node name="egg" parent="." instance=ExtResource("2_y0acb")]
 position = Vector2(258, -527)
 rotation = 0.0080111
+
+[node name="platformTileMap" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray(0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0)
+tile_set = ExtResource("3_u81e1")
