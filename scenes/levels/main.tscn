@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwckb05ota23m"]
+
+[ext_resource type="PackedScene" uid="uid://h17puraebncd" path="res://scenes/player/egg.tscn" id="2_y0acb"]
+
+[node name="Main" type="Node2D"]
+
+[node name="egg" parent="." instance=ExtResource("2_y0acb")]
+position = Vector2(258, -527)
+rotation = 0.0080111
