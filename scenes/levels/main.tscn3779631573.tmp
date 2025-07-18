@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://bwckb05ota23m"]
+
+[ext_resource type="PackedScene" uid="uid://c4w0hrhh2rs7f" path="res://scenes/objects/testest.tscn" id="1_2vj2h"]
+[ext_resource type="PackedScene" uid="uid://h17puraebncd" path="res://scenes/player/egg.tscn" id="2_y0acb"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Testest" parent="." instance=ExtResource("1_2vj2h")]
+position = Vector2(304, 666)
+rotation = -2.00899
+
+[node name="egg" parent="." instance=ExtResource("2_y0acb")]
+position = Vector2(258, -527)
+rotation = 0.0080111
