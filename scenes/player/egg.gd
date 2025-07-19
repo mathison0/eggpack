@@ -7,10 +7,10 @@ extends RigidBody2D
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
 @export var jetpack_torque_amount = 20000.0 # 인스펙터에서 조절 가능 (큰 값으로 시작)
 # 최대 낙하 속도 (선택 사항: RigidBody2D는 힘에 의해 가속되므로 속도가 무한정 증가할 수 있습니다.)
-@export var max_linear_speed = 30000.0 # 최대 선형(직선) 속도
+@export var max_linear_speed = 1000000.0 # 최대 선형(직선) 속도
 @export var max_angular_speed = 3000.0 # 최대 각속도 (회전 속도, 라디안/초)
 # 충돌 판정 관련 변수
-@export var impact_damage_threshold_speed: float = 1000.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
+@export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ======= 연료 시스템 변수 (제트팩별로 분리) =======
 @export var max_jetpack_fuel: float = 100.0 # 각 제트팩의 최대 연료량
@@ -146,6 +146,16 @@ func _physics_process(delta):
 		
 	# 속도 및 각속도 제한
 	_limit_velocities()	
+	
+	## 현재 RigidBody2D의 linear_velocity를 가져옵니다.
+	#var current_velocity_vector = linear_velocity 
+	#print("현재 속도 벡터: ", current_velocity_vector)
+	#print("X 속도: ", current_velocity_vector.x)
+	#print("Y 속도: ", current_velocity_vector.y)
+	#
+	#var current_speed = linear_velocity.length()
+	#print("현재 속력: ", current_speed)
+
 
 ## 헬퍼 함수
 # _apply_jetpack_force 함수의 offset 인자는 이제 사용되지 않습니다. (apply_central_force 때문)
@@ -202,11 +212,35 @@ func _on_right_jetpack_timer_timeout():
 # 달걀이 다른 물리 오브젝트(바닥)와 충돌했을 때 호출
 func _on_body_entered(body: Node2D):
 	# 충돌한 오브젝트가 'Ground' 그룹에 속하는지 확인
-	# (사용자님은 'Ground' 그룹을 바닥 노드에 할당해야 합니다)
 	if body.is_in_group("Ground"):
 		is_on_ground = true
+		
+		## 충돌 속도 판정
+		#var impact_speed = linear_velocity.length()
+		#print("Impact speed: ", impact_speed)
+		#
+		#if impact_speed > impact_damage_threshold_speed:
+			#print("강한 충돌 감지! 속도: ", impact_speed, " (임계값: ", impact_damage_threshold_speed, ")")
+			## 여기에 달걀이 깨지거나, 데미지를 입거나, 다른 효과를 발생시키는 코드를 추가할 수 있습니다.
+			## 예: get_node("/root/Main").egg_broken() (Main 씬에 egg_broken 함수가 있다고 가정)
+			## 예: queue_free() # 달걀 파괴 (씬에서 제거)
+		#else:
+			#print("충돌 속도 양호: ", impact_speed)
 
 # 달걀이 다른 물리 오브젝트에서 떨어졌을 때 호출
 func _on_body_exited(body: Node2D):
 	if body.is_in_group("Ground"):
 		is_on_ground = false
+		
+# 		
+func _integrate_forces(state: PhysicsDirectBodyState2D):
+	if state.get_contact_count() == 0:
+		return
+	
+	for i in state.get_contact_count():
+		var impulse = state.get_contact_impulse(i)
+		
+		if impulse.length() > impact_damage_threshold_speed:
+			print("강한 충돌 감지됨! 충돌 임펄스: ", impulse.length())
+			
+			break
