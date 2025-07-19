@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fnveyyevtu4d"
-path="res://.godot/imported/jetpack_left_with_fire.png-9fd69a8cbc8706f0edaa4fe1e38825e3.ctex"
+uid="uid://n1p7n4xbfmsi"
+path="res://.godot/imported/jetpack_right_with_fire.png-b33ccbc00e09cb055e80681b74920e2d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/graphics/jetpack_left_with_fire.png"
-dest_files=["res://.godot/imported/jetpack_left_with_fire.png-9fd69a8cbc8706f0edaa4fe1e38825e3.ctex"]
+source_file="res://assets/graphics/jetpack/jetpack_right_with_fire.png"
+dest_files=["res://.godot/imported/jetpack_right_with_fire.png-b33ccbc00e09cb055e80681b74920e2d.ctex"]
 
 [params]
 
