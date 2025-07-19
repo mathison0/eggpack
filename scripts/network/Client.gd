@@ -46,6 +46,11 @@ func _process(delta):
 				connected(id)
 			
 			if data.message == Message.userConnected:
+				# 서버가 나에게만 보내주는 상세 정보 패킷인지 확인합니다.
+				if data.has("player") and data.id == self.id:
+				# 전역 변수에 나의 플레이어 인덱스를 저장합니다.
+					GameManager.my_index = data.player.index
+					print("My player index is set to: ", GameManager.my_index)
 				createPeer(data.id)
 			
 			if data.message == Message.lobby:
@@ -138,6 +143,7 @@ func iceCandidateCreated(midName, indexName, sdpName, id):
 	peer.put_packet(JSON.stringify(message).to_utf32_buffer())
 	pass
 
+#3.27.86.38:8915
 func connectToServer(ip):
 	peer.create_client("ws://3.27.86.38:8915")
 	print("client created")
@@ -169,3 +175,15 @@ func _on_button_button_down() -> void:
 @rpc("any_peer")
 func ping():
 	print("ping from " + str(multiplayer.get_remote_sender_id()))
+	
+# 서버로부터 "게임 시작!" 신호를 받는 RPC 함수입니다.
+@rpc("any_peer", "call_local")
+func start_game_scene():
+	# 모든 플레이어의 화면을 GameWorld.tscn으로 전환합니다.
+	get_tree().change_scene_to_file("res://scenes/levels/GameWorld.tscn")
+
+
+
+func _on_start_game_button_down() -> void:
+	# 나 자신(호스트)을 포함한 모든 연결된 클라이언트에게 게임을 시작하라고 알립니다.
+	start_game_scene.rpc()

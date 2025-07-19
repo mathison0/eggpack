@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://vofywbsfj363"]
+
+[ext_resource type="PackedScene" uid="uid://h17puraebncd" path="res://scenes/player/egg.tscn" id="1_4swk4"]
+[ext_resource type="Script" uid="uid://clj031iki2qx3" path="res://scripts/levels/GameWorld.gd" id="1_84m4g"]
+
+[node name="GameWorld" type="Node2D"]
+script = ExtResource("1_84m4g")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+spawn_path = NodePath("SpawnableObjects")
+
+[node name="SpawnableObjects" type="Node" parent="MultiplayerSpawner"]
+
+[node name="Egg" parent="MultiplayerSpawner/SpawnableObjects" instance=ExtResource("1_4swk4")]

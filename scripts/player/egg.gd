@@ -12,6 +12,10 @@ extends RigidBody2D
 # 충돌 판정 관련 변수
 @export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
+# ======= 목숨 시스템 변수 =======
+@export var max_lives: int = 3 # 최대 목숨 수
+var current_lives: int # 현재 목숨 수
+
 # ======= 연료 시스템 변수 (제트팩별로 분리) =======
 @export var max_jetpack_fuel: float = 100.0 # 각 제트팩의 최대 연료량
 @export var jetpack_fuel_consumption_rate: float = 17.0 # 초당 연료 소모량 (단위: 연료/초)
@@ -93,9 +97,28 @@ func _ready():
 func _physics_process(delta):
 	var total_torque_to_apply = 0.0
 	
-	var left_key_pressed = Input.is_action_pressed("ui_left")
-	var right_key_pressed = Input.is_action_pressed("ui_right")
-
+	#var left_key_pressed = Input.is_action_pressed("ui_left")
+	#var right_key_pressed = Input.is_action_pressed("ui_right")
+	var left_key_pressed
+	var right_key_pressed
+		# 1. 호스트(서버)인지 확인하고, 왼쪽 키를 처리합니다.
+	print(multiplayer.get_unique_id())
+	if GameManager.my_index == 1:
+		if Input.is_action_pressed("ui_left"):
+			left_key_pressed = true
+			# "left" 제트팩을 켜라고 모든 플레이어에게 알립니다.
+			fire_jetpack.rpc("left")
+		else:
+			left_key_pressed = false
+	# 2. 클라이언트인지 확인하고, 오른쪽 키를 처리합니다.
+	else:
+		if Input.is_action_pressed("ui_right"):
+			right_key_pressed = true
+		# 	"right" 제트팩을 켜라고 모든 플레이어에게 알립니다.
+			fire_jetpack.rpc("right")
+		else:
+			right_key_pressed = false
+	
 	# 제트팩 키를 누르고 있는지 여부 (충전 로직에 사용)
 	var any_jetpack_key_active = (left_key_pressed or right_key_pressed)
 	
@@ -109,7 +132,7 @@ func _physics_process(delta):
 		#current_left_jetpack_fuel = clampi(current_left_jetpack_fuel, 0, max_jetpack_fuel)
 		
 		total_torque_to_apply += jetpack_torque_amount # 시계 방향 회전
-		_apply_jetpack_force(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
+		#_apply_jetpack_force(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
 	else:
 		_reset_jetpack_state(jetpack_left_sprite, left_jetpack_timer, jetpack_left_idle_texture, left_jetpack_anim_state)
 
@@ -121,7 +144,7 @@ func _physics_process(delta):
 		total_torque_to_apply -= jetpack_torque_amount # 반시계 방향 회전 (음수 토크)
 		# _apply_jetpack_force를 호출하여 달걀의 로컬 '위' 방향으로 추진력을 줍니다.
 		# 이제 _apply_jetpack_force는 apply_central_force를 사용하므로, 토크에 간섭하지 않습니다.
-		_apply_jetpack_force(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
+		#_apply_jetpack_force(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
 	else:
 		_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture, right_jetpack_anim_state)
 		
@@ -244,3 +267,18 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 			print("강한 충돌 감지됨! 충돌 임펄스: ", impulse.length())
 			
 			break
+
+# RPC 함수: 모든 플레이어의 컴퓨터에서 이 함수가 실행됩니다.
+@rpc("any_peer", "call_local", "unreliable")
+func fire_jetpack(side: String):
+	# 누가 RPC를 보냈는지 ID를 가져옵니다.
+	var sender_id = multiplayer.get_remote_sender_id()
+   
+	print("Jetpack '%s' fired by player %s" % [side, sender_id])
+
+	if side == "left":
+		# 왼쪽 제트팩: 오른쪽 위로 힘을 가합니다.
+		_apply_jetpack_force(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
+	elif side == "right":
+		# 오른쪽 제트팩: 왼쪽 위로 힘을 가합니다.
+		_apply_jetpack_force(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
