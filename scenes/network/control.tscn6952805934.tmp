@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3 uid="uid://oemj5c2l2ggs"]
+
+[ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
+[ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Client" type="Node" parent="."]
+script = ExtResource("1_4c5f7")
+
+[node name="LineEdit" type="LineEdit" parent="Client"]
+offset_left = 182.0
+offset_top = 155.0
+offset_right = 605.0
+offset_bottom = 186.0
+
+[node name="Server" type="Node" parent="."]
+script = ExtResource("2_yommx")
+
+[node name="StartClient" type="Button" parent="."]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Start Client"
+
+[node name="StartServer" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1052.0
+offset_right = 1152.0
+offset_bottom = 31.0
+text = "Start Server"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 3.0
+offset_top = 77.0
+offset_right = 157.0
+offset_bottom = 108.0
+text = "Send Message Test"
+
+[node name="Button2" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1060.0
+offset_top = 73.0
+offset_right = 1101.0
+offset_bottom = 104.0
+text = "asdf"
+
+[node name="JoinLobby" type="Button" parent="."]
+offset_left = 6.0
+offset_top = 153.0
+offset_right = 160.0
+offset_bottom = 184.0
+text = "Join Lobby"
+
+[connection signal="button_down" from="StartClient" to="Client" method="_on_start_client_button_down"]
+[connection signal="button_down" from="StartServer" to="Server" method="_on_start_server_button_down"]
+[connection signal="button_down" from="Button" to="Client" method="_on_button_button_down"]
+[connection signal="button_down" from="Button2" to="Server" method="_on_button_2_button_down"]
+[connection signal="button_down" from="JoinLobby" to="Client" method="_on_join_lobby_button_down"]
