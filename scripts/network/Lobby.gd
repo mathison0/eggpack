@@ -3,7 +3,7 @@ class_name Lobby
 
 var HostID : int
 var Players : Dictionary = {}
-var creation_time # 로비의 생성 시간 저장
+var creation_time : int # 로비의 생성 시간 저장
 
 func _init(id) -> void:
 	HostID = id

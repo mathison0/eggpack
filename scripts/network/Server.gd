@@ -35,7 +35,7 @@ func _ready():
 func _process(delta):
 	peer.poll()
 	
-	#_check_stale_lobbies()
+	_check_stale_lobbies()
 	
 	if peer.get_available_packet_count() > 0:
 		var packet = peer.get_packet()
@@ -128,9 +128,10 @@ func _check_stale_lobbies():
 	var current_time = Time.get_ticks_msec()
 	var lobbies_to_remove = []
 
-	for lobby in lobbies:
+	for lobby_id in lobbies:
+		var lobby = lobbies[lobby_id]
 		if current_time - lobby.creation_time > LOBBY_TIMEOUT:
-			lobbies_to_remove.append(lobby)
+			lobbies_to_remove.append(lobby_id)
 	
 	for lobby_id in lobbies_to_remove:
 		print("stale lobby removed by timeout: " + lobby_id)
