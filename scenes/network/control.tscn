@@ -34,10 +34,20 @@ text = "Join Lobby"
 
 [node name="StartGame" type="Button" parent="Client"]
 offset_left = 6.0
-offset_top = 235.0
+offset_top = 311.0
 offset_right = 102.0
-offset_bottom = 266.0
+offset_bottom = 342.0
 text = "Start Game"
+
+[node name="CodeLabel" type="RichTextLabel" parent="Client"]
+offset_left = 7.0
+offset_top = 201.0
+offset_right = 353.0
+offset_bottom = 224.0
+focus_mode = 2
+text = "Create Lobby Code (Share with your friend!) :"
+fit_content = true
+selection_enabled = true
 
 [node name="Server" type="Node" parent="."]
 script = ExtResource("2_yommx")

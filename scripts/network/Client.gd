@@ -15,6 +15,7 @@ enum Message {
 
 @onready var start_game_button = $StartGame
 @onready var line_edit = $LineEdit
+@onready var code_label = $CodeLabel
 
 var peer = WebSocketMultiplayerPeer.new()
 var id = 0
@@ -70,6 +71,7 @@ func _process(delta):
 				# ----------- Put GameManger gathering player Info here!!! -----------*=
 				print("player infos: ", players)
 				print("Lobby code: ", GameManager.lobby_code)
+				code_label.text = "Create Lobby Code (Share with your friend!):\n" + str(GameManager.lobby_code)
 			
 			if data.message == Message.candidate:
 				if rtcPeer.has_peer(data.orgPeer):
@@ -157,7 +159,7 @@ func iceCandidateCreated(midName, indexName, sdpName, id):
 
 #3.27.86.38:8915
 func connectToServer(ip):
-	peer.create_client("ws://127.0.0.1:8915")
+	peer.create_client("ws://3.27.86.38:8915")
 	print("client created")
 
 func _on_start_client_button_down() -> void:
