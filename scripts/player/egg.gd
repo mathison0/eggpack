@@ -44,12 +44,18 @@ var current_right_jetpack_fuel: float
 # ================================================================
 # 노드 참조
 # ================================================================
-@onready var jetpack_left_sprite = $JetpackLeft/Sprite2D
-@onready var jetpack_right_sprite = $JetpackRight/Sprite2D
-@onready var left_jetpack_timer = $JetpackLeft/AnimationTimer
-@onready var right_jetpack_timer = $JetpackRight/AnimationTimer
-@onready var fuel_bar_left = $JetpackLeft/FuelBarLeft
-@onready var fuel_bar_right = $JetpackRight/FuelBarRight
+@onready var jetpack_left_sprite = $Visuals/JetpackLeft/Sprite2D
+@onready var jetpack_right_sprite = $Visuals/JetpackRight/Sprite2D
+@onready var left_jetpack_timer = $Visuals/JetpackLeft/AnimationTimer
+@onready var right_jetpack_timer = $Visuals/JetpackRight/AnimationTimer
+@onready var fuel_bar_left = $Visuals/JetpackLeft/FuelBarLeft
+@onready var fuel_bar_right = $Visuals/JetpackRight/FuelBarRight
+
+# 시각 표현 관련 노드
+@onready var visuals = $Visuals
+
+@export var interpolation_speed = 15.0
+
 
 # ================================================================
 # 내부 상태 변수
@@ -96,6 +102,14 @@ func _ready():
 	# RigidBody2D의 Contact Monitor를 true로, Contacts Reported를 1 이상으로 설정해야 합니다.
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	
+	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		# 호스트: 물리 엔진이 완전히 적용되는 Rigid 모드를 사용합니다.
+		print("This body is HOST. Mode set to RIGID.")
+	else:
+		# 클라이언트: 물리 엔진의 영향을 받지 않는 Kinematic 모드로 설정합니다.
+		# 이렇게 하면 호스트로부터 받은 위치로만 움직이며, 독자적인 물리 계산을 하지 않습니다.
+		print("This body is CLIENT. Mode set to KINEMATIC.")
 
 
 # ================================================================
@@ -149,6 +163,8 @@ func _physics_process(delta):
 		# 또한 호스트 자신의 화면에도 즉시 반영합니다.
 		update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_key_pressed and can_use_left_jetpack, right_key_pressed and can_use_right_jetpack)
 
+		visuals.global_position = global_position
+		visuals.global_rotation = global_rotation
 	else:
 		# --- 클라이언트(P2) 로직: 자신의 입력 상태를 호스트에게 전송 ---
 		var right_pressed = Input.is_action_pressed("ui_right")
@@ -158,6 +174,11 @@ func _physics_process(delta):
 			set_client_jetpack_input.rpc(right_pressed)
 			_client_previous_input_state = right_pressed
 
+# 클라이언트의 시각 위치 보간
+func _process(delta):
+	if get_multiplayer_authority() != multiplayer.get_unique_id():
+		visuals.global_position = visuals.global_position.lerp(global_position, delta * interpolation_speed)
+		visuals.global_rotation = lerp_angle(visuals.global_rotation, global_rotation, delta * interpolation_speed)
 
 # ================================================================
 # RPC (원격 프로시저 호출) 함수들
