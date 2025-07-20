@@ -5,9 +5,9 @@ extends RigidBody2D
 # 플레이어 설정 변수들
 # ================================================================
 # 제트팩 분사 시 상승하는 힘
-@export var jetpack_thrust_vertical = 1000.0
+@export var jetpack_thrust_vertical = 1500.0
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
-@export var jetpack_torque_amount = 20000.0
+@export var jetpack_torque_amount = 25000.0
 # 최대 속도 제한
 @export var max_linear_speed = 1000000.0 # 최대 선형(직선) 속도
 @export var max_angular_speed = 3000.0 # 최대 각속도 (회전 속도)

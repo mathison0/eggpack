@@ -26,3 +26,7 @@ Ground=""
 
 common/physics_ticks_per_second=240
 common/max_physics_steps_per_frame=32
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
