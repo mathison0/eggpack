@@ -127,6 +127,7 @@ func _ready():
 		# 클라이언트: 물리 엔진의 영향을 받지 않는 Kinematic 모드로 설정합니다.
 		# 이렇게 하면 호스트로부터 받은 위치로만 움직이며, 독자적인 물리 계산을 하지 않습니다.
 		print("This body is CLIENT. Mode set to KINEMATIC.")
+	add_to_group("Egg")
 
 
 # ================================================================
@@ -138,11 +139,11 @@ func _physics_process(delta):
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# --- 호스트(P1) 로직: 입력 처리 및 물리 계산 ---
 		
-		# 목숨이 0이면 움직임을 멈춤
-		if current_lives <= 0:
-			linear_velocity = Vector2.ZERO
-			angular_velocity = 0.0
-			return # 더 이상 물리 처리 진행 안 함
+		## 목숨이 0이면 움직임을 멈춤
+		#if current_lives <= 0:
+			#linear_velocity = Vector2.ZERO
+			#angular_velocity = 0.0
+			#return # 더 이상 물리 처리 진행 안 함
 		
 		# 호스트(P1)는 자신의 입력을 직접 읽습니다.
 		var left_key_pressed = Input.is_action_pressed("ui_left")
@@ -236,7 +237,38 @@ func sync_visuals(left_fuel: float, right_fuel: float, left_on: bool, right_on: 
 		else:
 			_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
 
+# ===============================
+# NEW: RPC - 목숨 동기화
+# ===============================
+@rpc("any_peer", "reliable")
+func sync_lives(lives: int):
+	# 클라이언트에서 목숨 상태를 갱신
+	current_lives = lives
+	update_egg_sprite()
+	lives_changed.emit(current_lives)
 
+# ===============================
+# NEW: RPC - 달걀 제거 동기화
+# ===============================
+@rpc("any_peer", "reliable")
+func egg_destroy():
+	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		# ✅ 오직 호스트만 제거
+		queue_free()
+	else:
+		# ✅ 클라이언트는 스프라이트만 변경
+		egg_main_sprite.texture = egg_broken_texture
+
+# ===============================
+# NEW: RPC - 물리 비활성화 + 제거
+# (선택적으로 쓸 수 있음)
+# ===============================
+@rpc("any_peer", "reliable")
+func disable_physics_and_free():
+	self.mode = 1
+	set_physics_process(false)
+	queue_free()
+	
 # ================================================================
 # 헬퍼(도우미) 함수들
 # ================================================================
@@ -320,6 +352,9 @@ func _on_body_exited(body: Node2D):
 
 # 강한 충돌 감지 (물리 엔진 콜백, 호스트에서만 실행됨)
 func _integrate_forces(state: PhysicsDirectBodyState2D):
+	if get_multiplayer_authority() != multiplayer.get_unique_id():
+		return
+		
 	if state.get_contact_count() > 0:
 		for i in state.get_contact_count():
 			var impulse = state.get_contact_impulse(i)
@@ -342,19 +377,28 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 					
 					lives_changed.emit(current_lives) # UI 업데이트용 시그널 발생
 					update_egg_sprite() # 달걀 스프라이트 업데이트
+					sync_lives.rpc(current_lives)
 					
 					# 목숨이 0이 되면 게임 오버 처리
 					if current_lives <= 0:
 						print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
 						egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
+						update_egg_sprite()
+						lives_changed.emit(current_lives)
 						
-						# 물리적인 움직임을 즉시 멈춥니다.
-						linear_velocity = Vector2.ZERO
-						angular_velocity = 0.0
-						set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+						## 물리적인 움직임을 즉시 멈춥니다.
+						#linear_velocity = Vector2.ZERO
+						#angular_velocity = 0.0
 						
+						#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
+						## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
+						#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+						
+						egg_destroy.rpc() # 모든 클라이언트에게도 제거 지시
+
 						# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
-						await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
-						queue_free() # 달걀 노드 제거
+						#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
+						#queue_free() # 달걀 노드 제거
 						# 여기에 게임 오버 화면 전환, 재시작 로직 등을 추가할 수 있습니다.
-					break # 한 번의 충돌로 목숨이 줄었으면 더 이상 다른 접촉 임펄스를 확인할 필요 없음
+						
+						break # 한 번의 충돌로 목숨이 줄었으면 더 이상 다른 접촉 임펄스를 확인할 필요 없음

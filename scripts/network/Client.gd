@@ -201,3 +201,23 @@ func _on_start_game_button_down() -> void:
 		return
 	# 나 자신(호스트)을 포함한 모든 연결된 클라이언트에게 게임을 시작하라고 알립니다.
 	start_game_scene.rpc()
+
+@rpc("any_peer", "reliable")
+func egg_destroy():
+	var egg = get_tree().get_first_node_in_group("Egg")
+	if egg:
+		# 모든 클라이언트에게 시각적인 파괴 처리만 요청
+		egg_break_only.rpc()
+
+		# 내 ID가 호스트일 경우에만 실제 queue_free() 처리
+		if GameManager.my_id == GameManager.host_id:
+			await get_tree().create_timer(3.0).timeout
+			#egg.queue_free()
+			
+@rpc("any_peer", "call_local")
+func egg_break_only():
+	var egg = get_tree().get_first_node_in_group("Egg")
+	if egg:
+		egg.egg_main_sprite.texture = egg.egg_broken_texture
+		egg.update_egg_sprite()
+		egg.lives_changed.emit(egg.current_lives)
