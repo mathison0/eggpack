@@ -13,16 +13,22 @@ enum Message {
 	checkIn
 }
 
+@onready var start_game_button = $StartGame
+@onready var line_edit = $LineEdit
+
 var peer = WebSocketMultiplayerPeer.new()
 var id = 0
 # 연결을 직접적으로 다룸
 var rtcPeer : WebRTCMultiplayerPeer = WebRTCMultiplayerPeer.new() 
 var lobbyValue = ""
+var host_id = 0
 
 func _ready():
 	multiplayer.connected_to_server.connect(RTCServerConnected)
 	multiplayer.peer_connected.connect(RTCPeerConnected)
 	multiplayer.peer_disconnected.connect(RTCPeerDisconnected)
+	
+	start_game_button.hide()
 
 func RTCServerConnected():
 	print("RTC server connected")
@@ -40,24 +46,30 @@ func _process(delta):
 		if packet != null:
 			var dataString = packet.get_string_from_utf32()
 			var data = JSON.parse_string(dataString)
-			print(data)
 			if data.message == Message.id:
 				id = data.id
+				GameManager.my_id = id
 				connected(id)
 			
 			if data.message == Message.userConnected:
 				# 서버가 나에게만 보내주는 상세 정보 패킷인지 확인합니다.
 				if data.has("player") and data.id == self.id:
 				# 전역 변수에 나의 플레이어 인덱스를 저장합니다.
-					GameManager.my_index = data.player.index
-					print("My player index is set to: ", GameManager.my_index)
+					GameManager.host_id = data.host
+					print("Host id is: ", GameManager.host_id)
+					host_id = data.host
+					
+					if GameManager.my_id == GameManager.host_id:
+						start_game_button.show()
 				createPeer(data.id)
 			
 			if data.message == Message.lobby:
 				var players = JSON.parse_string(data.players)
 				lobbyValue = data.lobbyValue
+				GameManager.lobby_code = data.lobbyValue
 				# ----------- Put GameManger gathering player Info here!!! -----------*=
 				print("player infos: ", players)
+				print("Lobby code: ", GameManager.lobby_code)
 			
 			if data.message == Message.candidate:
 				if rtcPeer.has_peer(data.orgPeer):
@@ -145,7 +157,7 @@ func iceCandidateCreated(midName, indexName, sdpName, id):
 
 #3.27.86.38:8915
 func connectToServer(ip):
-	peer.create_client("ws://3.27.86.38:8915")
+	peer.create_client("ws://127.0.0.1:8915")
 	print("client created")
 
 func _on_start_client_button_down() -> void:
@@ -179,11 +191,11 @@ func ping():
 # 서버로부터 "게임 시작!" 신호를 받는 RPC 함수입니다.
 @rpc("any_peer", "call_local")
 func start_game_scene():
-	# 모든 플레이어의 화면을 GameWorld.tscn으로 전환합니다.
 	get_tree().change_scene_to_file("res://scenes/levels/GameWorld.tscn")
 
 
-
 func _on_start_game_button_down() -> void:
+	if GameManager.my_id != GameManager.host_id:
+		return
 	# 나 자신(호스트)을 포함한 모든 연결된 클라이언트에게 게임을 시작하라고 알립니다.
 	start_game_scene.rpc()
