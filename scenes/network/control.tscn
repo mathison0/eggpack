@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dxbh2mtyqxpw6"]
+[gd_scene load_steps=5 format=4 uid="uid://dxbh2mtyqxpw6"]
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
+[ext_resource type="TileSet" uid="uid://d172upd0g07ld" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
+[ext_resource type="Texture2D" uid="uid://cg7xtnwthcnrq" path="res://assets/graphics/logo.png" id="2_yl8f6"]
 [ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
 
 [node name="Control" type="Control"]
@@ -11,48 +13,84 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Client" type="Node" parent="."]
+[node name="Client" type="Control" parent="."]
+anchors_preset = 0
 script = ExtResource("1_4c5f7")
 
-[node name="LineEdit" type="LineEdit" parent="Client"]
-offset_left = 182.0
-offset_top = 155.0
-offset_right = 605.0
-offset_bottom = 186.0
+[node name="TileMapLayer" type="TileMapLayer" parent="Client"]
+tile_map_data = PackedByteArray("AAAAAAAAAAAAAAAAAAABAAAAAAABAAAAAAACAAAAAAAAAAAAAAADAAAAAAABAAAAAAADAAEAAAABAAAAAAACAAEAAAAAAAAAAAABAAEAAAABAAAAAAAAAAEAAAAAAAAAAAA=")
+tile_set = ExtResource("2_05ykq")
 
-[node name="StartClient" type="Button" parent="Client"]
-offset_right = 95.0
-offset_bottom = 31.0
-text = "Start Client"
+[node name="TextureRect" type="TextureRect" parent="Client"]
+layout_mode = 0
+offset_left = 395.0
+offset_top = 102.0
+offset_right = 1547.0
+offset_bottom = 1126.0
+scale = Vector2(0.250932, 0.190708)
+texture = ExtResource("2_yl8f6")
 
-[node name="JoinLobby" type="Button" parent="Client"]
-offset_left = 6.0
-offset_top = 153.0
-offset_right = 160.0
-offset_bottom = 184.0
-text = "Join Lobby"
+[node name="ConnectionPanel" type="VBoxContainer" parent="Client"]
+layout_mode = 0
+offset_left = 472.0
+offset_top = 275.0
+offset_right = 609.0
+offset_bottom = 333.0
+
+[node name="Label" type="Label" parent="Client/ConnectionPanel"]
+layout_mode = 2
+text = "서버에 접속하세요!"
+
+[node name="StartClient" type="Button" parent="Client/ConnectionPanel"]
+layout_mode = 2
+text = "게임 시작하기"
+
+[node name="LobbyPanel" type="VBoxContainer" parent="Client"]
+layout_mode = 0
+offset_left = 291.0
+offset_top = 354.0
+offset_right = 791.0
+offset_bottom = 562.0
+
+[node name="CreateLobby" type="Button" parent="Client/LobbyPanel"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "로비 생성하기
+"
+
+[node name="JoinLobby" type="Button" parent="Client/LobbyPanel"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+text = "코드로 로비 참가하기
+"
+
+[node name="LineEdit" type="LineEdit" parent="Client/LobbyPanel"]
+layout_mode = 2
+max_length = 32
+
+[node name="CodeLabel" type="RichTextLabel" parent="Client/LobbyPanel"]
+visible = false
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+focus_mode = 2
+text = "로비 코드 (친구와 공유해 보세요!):"
+fit_content = true
+horizontal_alignment = 1
+selection_enabled = true
 
 [node name="StartGame" type="Button" parent="Client"]
-offset_left = 6.0
-offset_top = 311.0
-offset_right = 102.0
-offset_bottom = 342.0
-text = "Start Game"
-
-[node name="CodeLabel" type="RichTextLabel" parent="Client"]
-offset_left = 7.0
-offset_top = 201.0
-offset_right = 353.0
-offset_bottom = 224.0
-focus_mode = 2
-text = "Create Lobby Code (Share with your friend!) :"
-fit_content = true
-selection_enabled = true
+offset_left = 489.0
+offset_top = 516.0
+offset_right = 598.0
+offset_bottom = 547.0
+text = "게임 시작하기"
+autowrap_mode = 3
 
 [node name="Server" type="Node" parent="."]
 script = ExtResource("2_yommx")
 
 [node name="StartServer" type="Button" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 1052.0
 offset_right = 1152.0
@@ -60,6 +98,7 @@ offset_bottom = 31.0
 text = "Start Server"
 
 [node name="Button" type="Button" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 3.0
 offset_top = 77.0
@@ -68,6 +107,7 @@ offset_bottom = 108.0
 text = "Send Message Test"
 
 [node name="Button2" type="Button" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 1060.0
 offset_top = 73.0
@@ -75,8 +115,9 @@ offset_right = 1101.0
 offset_bottom = 104.0
 text = "asdf"
 
-[connection signal="button_down" from="Client/StartClient" to="Client" method="_on_start_client_button_down"]
-[connection signal="button_down" from="Client/JoinLobby" to="Client" method="_on_join_lobby_button_down"]
+[connection signal="button_down" from="Client/ConnectionPanel/StartClient" to="Client" method="_on_start_client_button_down"]
+[connection signal="button_down" from="Client/LobbyPanel/CreateLobby" to="Client" method="_on_create_lobby_button_down"]
+[connection signal="button_down" from="Client/LobbyPanel/JoinLobby" to="Client" method="_on_join_lobby_button_down"]
 [connection signal="button_down" from="Client/StartGame" to="Client" method="_on_start_game_button_down"]
 [connection signal="button_down" from="StartServer" to="Server" method="_on_start_server_button_down"]
 [connection signal="button_down" from="Button" to="Client" method="_on_button_button_down"]
