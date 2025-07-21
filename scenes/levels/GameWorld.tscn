@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=4 uid="uid://vofywbsfj363"]
+[gd_scene load_steps=5 format=4 uid="uid://vofywbsfj363"]
 
 [ext_resource type="Script" uid="uid://clj031iki2qx3" path="res://scripts/levels/GameWorld.gd" id="1_84m4g"]
 [ext_resource type="PackedScene" uid="uid://twknfvlg8etj" path="res://scenes/objects/platform_tile_map.tscn" id="3_3sasu"]
 [ext_resource type="Script" uid="uid://cvhu4tl0yq5kf" path="res://scripts/ui/GameManager.gd" id="3_8ghft"]
+[ext_resource type="PackedScene" uid="uid://b5dposfhhh7ok" path="res://scenes/objects/save_point.tscn" id="4_8ghft"]
 
 [node name="GameWorld" type="Node2D"]
 script = ExtResource("1_84m4g")
@@ -12,3 +13,9 @@ tile_map_data = PackedByteArray("AAAAAAEAAAABAAAAAAABAAEAAAABAAAAAAACAAEAAAABAAA
 
 [node name="GameManager" type="Node" parent="." groups=["game_manager"]]
 script = ExtResource("3_8ghft")
+
+[node name="SavePoint" parent="." instance=ExtResource("4_8ghft")]
+position = Vector2(186, 69)
+
+[node name="SavePoint2" parent="." instance=ExtResource("4_8ghft")]
+position = Vector2(1741, -575)

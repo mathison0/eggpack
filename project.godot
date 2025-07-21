@@ -22,6 +22,8 @@ GameManager="*res://scripts/ui/GameManager.gd"
 
 Ground=""
 game_manager=""
+save_points=""
+Egg=""
 
 [physics]
 

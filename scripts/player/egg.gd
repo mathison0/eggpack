@@ -15,6 +15,13 @@ extends RigidBody2D
 @export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ================================================================
+# 세이브 포인트 및 리스폰 변수
+# ================================================================
+var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위치
+@export var default_spawn_pos: Vector2 = Vector2(0, 0) # 초기 스폰 위치 (세이브 포인트 없을 경우)
+@export var respawn_delay: float = 3.0 # 리스폰까지 대기 시간 (계란이 깨진 후)
+
+# ================================================================
 # 목숨 시스템 변수
 # ================================================================
 @export var max_lives: int = 2
@@ -109,6 +116,13 @@ func _ready():
 	# 물리 속성 초기화
 	gravity_scale = 1.0
 	sleeping = false
+	
+	# 초기 세이브 포인트는 기본 스폰 위치로 설정 (호스트만 초기화)
+	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		last_save_point_pos = default_spawn_pos
+		# 클라이언트에게도 초기 스폰 위치와 빈 노드 경로를 동기화
+		update_save_point_rpc.rpc(default_spawn_pos)
+	
 
 	# 타이머 신호 연결
 	left_jetpack_timer.timeout.connect(_on_left_jetpack_timer_timeout)
@@ -131,6 +145,11 @@ func _ready():
 	egg_main_sprite.texture = egg_texture # 초기 달걀은 온전한 상태
 	lives_changed.emit(current_lives) # UI에 초기 목숨 알림
 	
+	add_to_group("Egg")	
+	
+	# 계란판과의 충돌 감지 신호 연결
+	body_entered.connect(_on_body_entered_egg_carton) # 새로운 함수 연결
+	
 	# 디버깅을 위해 현재 권한과 피어 ID를 출력합니다.
 	print("Egg node's multiplayer_authority: ", get_multiplayer_authority())
 	print("Current peer unique ID: ", multiplayer.get_unique_id())
@@ -142,7 +161,7 @@ func _ready():
 		# 클라이언트: 물리 엔진의 영향을 받지 않는 Kinematic 모드로 설정합니다.
 		# 이렇게 하면 호스트로부터 받은 위치로만 움직이며, 독자적인 물리 계산을 하지 않습니다.
 		print("This body is CLIENT. Mode set to KINEMATIC.")
-	add_to_group("Egg")	
+	
 
 
 # ================================================================
@@ -261,6 +280,15 @@ func sync_lives(lives: int):
 	current_lives = lives
 	update_egg_sprite()
 	lives_changed.emit(current_lives)
+	
+# ===============================
+# RPC - 세이브 포인트 동기화 및 시각 효과 업데이트
+# ===============================
+@rpc("any_peer", "reliable")
+func update_save_point_rpc(pos: Vector2, active_node_path: NodePath):
+	# 모든 피어에서 세이브 포인트 위치를 업데이트합니다.
+	last_save_point_pos = pos
+	print("Save point updated to: ", last_save_point_pos, " on peer ", multiplayer.get_unique_id())
 
 # ===============================
 # RPC - 제트백 스폰, 이 RPC는 호스트 달걀에 의해 호출되며, 모든 피어에서 제트팩을 스폰하도록 합니다.
@@ -283,9 +311,34 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 	_spawn_jetpack_local(true, egg_global_pos, egg_linear_vel, egg_angular_vel) # 왼쪽 제트팩 스폰
 	_spawn_jetpack_local(false, egg_global_pos, egg_linear_vel, egg_angular_vel) # 오른쪽 제트팩 스폰
 	
-	# 달걀 노드 자체는 파괴된 후 잠시 후 제거
-	await get_tree().create_timer(3.0).timeout # 3초 대기
-	queue_free() # 달걀 노드 제거 (모든 피어에서)
+	# 달걀 노드 자체는 파괴된 후 잠시 후 리스폰
+	await get_tree().create_timer(respawn_delay).timeout # 설정된 리스폰 대기 시간만큼 대기
+	
+	# --- 리스폰 로직 (모든 피어에서 실행) ---
+	respawn_egg_local()
+	
+# ===============================
+# 리스폰 로직 (이전과 동일)
+# ===============================
+func respawn_egg_local():
+	print("Respawning egg on peer ", multiplayer.get_unique_id(), " at ", last_save_point_pos)
+
+	# 달걀의 시각적 및 물리적 상태 초기화
+	is_broken = false
+	current_lives = max_lives # 목숨 초기화
+	lives_changed.emit(current_lives) # UI 업데이트
+	update_egg_sprite() # 온전한 달걀 스프라이트로 변경
+
+	jetpack_left_visuals_node.visible = true # 제트팩 시각 다시 활성화
+	jetpack_right_visuals_node.visible = true
+	current_left_jetpack_fuel = max_jetpack_fuel # 연료 초기화
+	current_right_jetpack_fuel = max_jetpack_fuel
+	update_fuel_bars()
+
+	# 위치와 물리 상태 초기화
+	global_position = last_save_point_pos
+	linear_velocity = Vector2.ZERO
+	angular_velocity = 0.0
 	
 # ================================================================
 # 헬퍼(도우미) 함수들
@@ -409,6 +462,25 @@ func _on_body_entered(body: Node2D):
 func _on_body_exited(body: Node2D):
 	if body.is_in_group("Ground"):
 		is_on_ground = false
+		
+# NEW: 계란판(세이브 포인트) 충돌 감지
+func _on_body_entered_egg_carton(body: Node2D):
+	if body.is_in_group("save_points"): # 충돌한 body가 EggCarton인지 확인
+		# 충돌한 바디가 현재 피어의 권한을 가진 달걀인지 확인 (즉, 호스트의 달걀)
+		if get_multiplayer_authority() == multiplayer.get_unique_id():
+			var entered_carton = body # body는 Area2D(EggCarton) 노드 자체입니다.
+
+			# 새 세이브 포인트의 global_position
+			var new_save_pos = entered_carton.global_position
+
+			# 이미 같은 세이브 포인트에 도달했다면 업데이트하지 않음
+			if last_save_point_pos != new_save_pos:
+				print("Host Egg reached new save point: ", new_save_pos)
+				last_save_point_pos = new_save_pos
+
+				# 모든 피어에 세이브 포인트 위치만 동기화
+				update_save_point_rpc.rpc(last_save_point_pos) # active_node_path 인자 제거
+
 
 # 강한 충돌 감지 (물리 엔진 콜백, 호스트에서만 실행됨)
 func _integrate_forces(state: PhysicsDirectBodyState2D):
