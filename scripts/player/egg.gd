@@ -52,6 +52,12 @@ var current_right_jetpack_fuel: float
 @export var jetpack_right_idle_texture: Texture2D = preload("res://assets/graphics/jetpack/jetpack_right.png")
 
 # ================================================================
+# 분리될 제트팩 이미지 리소스
+# ================================================================
+@export var jetpack_left_broken_scene: PackedScene # 왼쪽 깨진 제트팩 씬 경로
+@export var jetpack_right_broken_scene: PackedScene # 오른쪽 깨진 제트팩 씬 경로
+
+# ================================================================
 # 노드 참조
 # ================================================================
 @onready var jetpack_left_sprite = $Visuals/JetpackLeft/Sprite2D
@@ -66,6 +72,9 @@ var current_right_jetpack_fuel: float
 # 달걀의 메인 스프라이트 노드 참조
 @onready var egg_main_sprite = $Visuals/Sprite2D
 
+@onready var jetpack_left_visuals_node = $Visuals/JetpackLeft
+@onready var jetpack_right_visuals_node = $Visuals/JetpackRight
+
 @export var interpolation_speed = 15.0
 
 
@@ -73,6 +82,7 @@ var current_right_jetpack_fuel: float
 # 내부 상태 변수
 # ================================================================
 var is_on_ground: bool = false
+var is_broken: bool = false # 달걀이 완전히 깨졌는지 여부 플래그
 
 # --- 애니메이션 상태 ---
 var left_jetpack_anim_state = false
@@ -89,6 +99,7 @@ var _client_previous_input_state = false
 # 초기 설정 함수
 # ================================================================
 func _ready():
+	
 	# 초기 텍스처 및 가시성 설정
 	jetpack_left_sprite.texture = jetpack_left_idle_texture
 	jetpack_right_sprite.texture = jetpack_right_idle_texture
@@ -120,6 +131,10 @@ func _ready():
 	egg_main_sprite.texture = egg_texture # 초기 달걀은 온전한 상태
 	lives_changed.emit(current_lives) # UI에 초기 목숨 알림
 	
+	# 디버깅을 위해 현재 권한과 피어 ID를 출력합니다.
+	print("Egg node's multiplayer_authority: ", get_multiplayer_authority())
+	print("Current peer unique ID: ", multiplayer.get_unique_id())
+	
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# 호스트: 물리 엔진이 완전히 적용되는 Rigid 모드를 사용합니다.
 		print("This body is HOST. Mode set to RIGID.")
@@ -127,7 +142,7 @@ func _ready():
 		# 클라이언트: 물리 엔진의 영향을 받지 않는 Kinematic 모드로 설정합니다.
 		# 이렇게 하면 호스트로부터 받은 위치로만 움직이며, 독자적인 물리 계산을 하지 않습니다.
 		print("This body is CLIENT. Mode set to KINEMATIC.")
-	add_to_group("Egg")
+	add_to_group("Egg")	
 
 
 # ================================================================
@@ -219,7 +234,7 @@ func set_client_jetpack_input(is_active: bool):
 func sync_visuals(left_fuel: float, right_fuel: float, left_on: bool, right_on: bool):
 	# 호스트가 아닌 클라이언트들만 이 RPC를 통해 상태를 업데이트합니다.
 	# (호스트는 이미 `update_visuals_and_broadcast`에서 직접 로컬 함수를 호출했습니다)
-	if not $MultiplayerSynchronizer.get_multiplayer_authority() == 1:
+	if get_multiplayer_authority() != multiplayer.get_unique_id(): # 현재 노드의 권한을 직접 확인
 		# 연료 상태 업데이트
 		current_left_jetpack_fuel = left_fuel
 		current_right_jetpack_fuel = right_fuel
@@ -238,7 +253,7 @@ func sync_visuals(left_fuel: float, right_fuel: float, left_on: bool, right_on: 
 			_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
 
 # ===============================
-# NEW: RPC - 목숨 동기화
+# RPC - 목숨 동기화
 # ===============================
 @rpc("any_peer", "reliable")
 func sync_lives(lives: int):
@@ -248,26 +263,29 @@ func sync_lives(lives: int):
 	lives_changed.emit(current_lives)
 
 # ===============================
-# NEW: RPC - 달걀 제거 동기화
+# RPC - 제트백 스폰, 이 RPC는 호스트 달걀에 의해 호출되며, 모든 피어에서 제트팩을 스폰하도록 합니다.
 # ===============================
-@rpc("any_peer", "reliable")
-func egg_destroy():
-	if get_multiplayer_authority() == multiplayer.get_unique_id():
-		# ✅ 오직 호스트만 제거
-		queue_free()
-	else:
-		# ✅ 클라이언트는 스프라이트만 변경
-		egg_main_sprite.texture = egg_broken_texture
-
-# ===============================
-# NEW: RPC - 물리 비활성화 + 제거
-# (선택적으로 쓸 수 있음)
-# ===============================
-@rpc("any_peer", "reliable")
-func disable_physics_and_free():
-	self.mode = 1
-	set_physics_process(false)
-	queue_free()
+@rpc("any_peer", "reliable", "call_local")
+func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_vel: Vector2, egg_angular_vel: float):
+	# 모든 피어에서 이 함수를 실행하지만,
+	# 제트팩 스폰 요청은 이 함수를 호출한 호스트의 정보를 사용합니다.
+	
+	# 달걀 파괴 시각 효과 (모든 피어에서 동일하게 실행)
+	is_broken = true # 달걀 깨짐 상태 플래그 설정
+	set_physics_process(false) # 물리 처리 중지
+	egg_main_sprite.texture = egg_broken_texture
+	jetpack_left_visuals_node.visible = false
+	jetpack_right_visuals_node.visible = false
+	
+	# 제트팩 스폰 (모든 피어에서 실행)
+	# 호스트는 이 값을 이용하여 제트팩의 초기 위치/속도를 설정하고,
+	# 클라이언트는 호스트가 보낸 값으로 제트팩을 스폰합니다.
+	_spawn_jetpack_local(true, egg_global_pos, egg_linear_vel, egg_angular_vel) # 왼쪽 제트팩 스폰
+	_spawn_jetpack_local(false, egg_global_pos, egg_linear_vel, egg_angular_vel) # 오른쪽 제트팩 스폰
+	
+	# 달걀 노드 자체는 파괴된 후 잠시 후 제거
+	await get_tree().create_timer(3.0).timeout # 3초 대기
+	queue_free() # 달걀 노드 제거 (모든 피어에서)
 	
 # ================================================================
 # 헬퍼(도우미) 함수들
@@ -329,7 +347,49 @@ func update_egg_sprite():
 		egg_main_sprite.texture = egg_cracked_texture
 	elif current_lives <= 0: # 목숨이 0개일 때
 		egg_main_sprite.texture = egg_broken_texture
+		
+# ================================================================
+# 달걀 파괴 및 제트팩 분리 함수
+# ================================================================
+# 이 함수는 RPC에 의해 모든 피어에서 실행되지만, 제트팩 스폰 명령은 호스트에서만 시작됩니다.
+func _spawn_jetpack_local(is_left: bool, egg_global_pos: Vector2, egg_linear_vel: Vector2, egg_angular_vel: float):
+	var jetpack_scene: PackedScene = null
+	var spawn_offset: Vector2 = Vector2.ZERO
+	var initial_velocity_offset: Vector2 = Vector2.ZERO
 
+	if is_left:
+		jetpack_scene = jetpack_left_broken_scene
+		spawn_offset = Vector2(-15, 0) # 달걀 중심에서 왼쪽으로 약간 떨어진 위치
+		initial_velocity_offset = Vector2(-randf_range(50, 150), randf_range(-50, -150)) # 왼쪽 위로 분산되는 속도
+	else:
+		jetpack_scene = jetpack_right_broken_scene
+		spawn_offset = Vector2(15, 0) # 달걀 중심에서 오른쪽으로 약간 떨어진 위치
+		initial_velocity_offset = Vector2(randf_range(50, 150), randf_range(-50, -150)) # 오른쪽 위로 분산되는 속도
+
+	if jetpack_scene:
+		var jetpack_instance = jetpack_scene.instantiate()
+		get_tree().get_root().add_child(jetpack_instance) # 씬 트리의 루트에 추가
+
+		# 중요: 스폰된 제트팩의 네트워크 권한을 호스트에게 부여합니다.
+		# 모든 피어가 로컬로 제트팩을 생성하지만, 물리 시뮬레이션은 호스트만 담당합니다.
+		jetpack_instance.set_multiplayer_authority(GameManager.host_id)
+		
+		# 전달받은 초기 위치, 속도, 각속도 적용
+		jetpack_instance.global_position = egg_global_pos + spawn_offset
+		jetpack_instance.linear_velocity = egg_linear_vel + initial_velocity_offset
+		jetpack_instance.angular_velocity = egg_angular_vel + randf_range(-3, 3) # 약간의 무작위 각속도 추가
+
+		print("Spawned jetpack (is_left: ", is_left, ") on peer ID: ", multiplayer.get_unique_id(), ", Authority: ", jetpack_instance.get_multiplayer_authority())
+
+		# 일정 시간 후 제트팩 제거 (메모리 관리)
+		var timer = Timer.new()
+		timer.wait_time = 10.0 # 10초 후 제거
+		timer.one_shot = true
+		jetpack_instance.add_child(timer)
+		timer.timeout.connect(jetpack_instance.queue_free)
+		timer.start()
+
+	
 # ================================================================
 # 신호 처리 함수들
 # ================================================================
@@ -354,7 +414,10 @@ func _on_body_exited(body: Node2D):
 func _integrate_forces(state: PhysicsDirectBodyState2D):
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
-		
+	
+	if is_broken:
+		return
+			
 	if state.get_contact_count() > 0:
 		for i in state.get_contact_count():
 			var impulse = state.get_contact_impulse(i)
@@ -394,7 +457,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 						## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
 						#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
 						
-						egg_destroy.rpc() # 모든 클라이언트에게도 제거 지시
+						command_egg_destroy_and_spawn_jetpacks.rpc(global_position, linear_velocity, angular_velocity)
 
 						# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
 						#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거

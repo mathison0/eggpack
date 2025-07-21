@@ -11,9 +11,7 @@ config_version=5
 [application]
 
 config/name="eggpack"
-
 run/main_scene="uid://oemj5c2l2ggs"
-
 config/features=PackedStringArray("4.4", "Forward Plus")
 
 [autoload]
@@ -23,6 +21,7 @@ GameManager="*res://scripts/ui/GameManager.gd"
 [global_group]
 
 Ground=""
+game_manager=""
 
 [physics]
 
