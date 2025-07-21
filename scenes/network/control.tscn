@@ -1,7 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://dxbh2mtyqxpw6"]
+[gd_scene load_steps=5 format=4 uid="uid://dxbh2mtyqxpw6"]
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
-[ext_resource type="TileSet" uid="uid://d172upd0g07ld" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
+[ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
 [ext_resource type="Texture2D" uid="uid://cg7xtnwthcnrq" path="res://assets/graphics/logo.png" id="2_yl8f6"]
 [ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
 
@@ -79,6 +79,7 @@ horizontal_alignment = 1
 selection_enabled = true
 
 [node name="StartGame" type="Button" parent="Client"]
+layout_mode = 0
 offset_left = 489.0
 offset_top = 516.0
 offset_right = 598.0
