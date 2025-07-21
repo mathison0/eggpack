@@ -1,6 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://h17puraebncd"]
+[gd_scene load_steps=8 format=3 uid="uid://h17puraebncd"]
 
 [ext_resource type="Script" uid="uid://dk2qjfi0tvwlp" path="res://scripts/player/egg.gd" id="1_eb0g5"]
+[ext_resource type="PhysicsMaterial" uid="uid://cl76u2816118q" path="res://scenes/player/Ice Physics Material.tres" id="2_5w8ku"]
+
 [ext_resource type="PackedScene" uid="uid://q32jwck016x3" path="res://scenes/player/Jetpack_Left_Broken.tscn" id="2_58t0v"]
 [ext_resource type="Texture2D" uid="uid://cii47wtsuo8q1" path="res://assets/graphics/egg/egg_img.png" id="2_eb0g5"]
 [ext_resource type="Texture2D" uid="uid://cwoo5r88f5cqs" path="res://assets/graphics/jetpack/jetpack_left.png" id="3_eb0g5"]
@@ -22,7 +24,7 @@ properties/2/replication_mode = 1
 radius = 110.0
 height = 262.0
 
-[node name="Egg" type="RigidBody2D"]
+[node name="Egg" type="RigidBody2D" groups=["Egg"]]
 gravity_scale = 1.2
 center_of_mass_mode = 1
 center_of_mass = Vector2(0, 40)
@@ -31,6 +33,7 @@ max_contacts_reported = 8
 linear_damp = 0.3
 angular_damp = 0.1
 script = ExtResource("1_eb0g5")
+ice_physics_material = ExtResource("2_5w8ku")
 jetpack_left_broken_scene = ExtResource("2_58t0v")
 jetpack_right_broken_scene = ExtResource("3_k2d6k")
 
