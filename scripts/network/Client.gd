@@ -1,4 +1,4 @@
-extends Node
+extends Control
 
 enum Message {
 	id,
@@ -14,8 +14,12 @@ enum Message {
 }
 
 @onready var start_game_button = $StartGame
-@onready var line_edit = $LineEdit
-@onready var code_label = $CodeLabel
+@onready var line_edit = $LobbyPanel/LineEdit
+@onready var code_label = $LobbyPanel/CodeLabel
+@onready var connection_panel = $ConnectionPanel
+@onready var lobby_panel = $LobbyPanel
+@onready var create_lobby = $LobbyPanel/CreateLobby
+@onready var join_lobby = $LobbyPanel/JoinLobby
 
 var peer = WebSocketMultiplayerPeer.new()
 var id = 0
@@ -29,13 +33,21 @@ func _ready():
 	multiplayer.peer_connected.connect(RTCPeerConnected)
 	multiplayer.peer_disconnected.connect(RTCPeerDisconnected)
 	
-	start_game_button.hide()
+	start_game_button.disabled = true
+	line_edit.editable = true
+	lobby_panel.hide()
 
 func RTCServerConnected():
 	print("RTC server connected")
 
 func RTCPeerConnected(id):
 	print("RTC peer connected " + str(id))
+	create_lobby.disabled = true
+	join_lobby.disabled = true
+	if GameManager.is_host():
+		start_game_button.disabled = false
+	else:
+		start_game_button.text = "호스트만 게임을 시작할 수 있습니다!"
 
 func RTCPeerDisconnected(id):
 	print("RTC peer disconnected " + str(id))
@@ -71,7 +83,11 @@ func _process(delta):
 				# ----------- Put GameManger gathering player Info here!!! -----------*=
 				print("player infos: ", players)
 				print("Lobby code: ", GameManager.lobby_code)
-				code_label.text = "Create Lobby Code (Share with your friend!):\n" + str(GameManager.lobby_code)
+				code_label.text = "로비 코드 (친구와 공유해 보세요!):\n" + str(GameManager.lobby_code)
+				create_lobby.disabled = true
+				join_lobby.disabled = true
+				line_edit.editable = false
+				code_label.show()
 			
 			if data.message == Message.candidate:
 				if rtcPeer.has_peer(data.orgPeer):
@@ -163,16 +179,19 @@ func connectToServer(ip):
 	print("client created")
 
 func _on_start_client_button_down() -> void:
+	connection_panel.hide()
 	connectToServer("")
+	lobby_panel.show()
 
 func _on_join_lobby_button_down() -> void:
-	var message = {
-		"id" : id,
-		"message" : Message.lobby,
-		"name" : "",
-		"lobbyValue" : $LineEdit.text
-	}
-	peer.put_packet(JSON.stringify(message).to_utf32_buffer())
+	if line_edit.text != null and line_edit.text != "":
+		var message = {
+			"id" : id,
+			"message" : Message.lobby,
+			"name" : "",
+			"lobbyValue" : line_edit.text
+		}
+		peer.put_packet(JSON.stringify(message).to_utf32_buffer())
 
 func deleteLobby():
 	var message = {
@@ -221,3 +240,13 @@ func egg_break_only():
 		egg.egg_main_sprite.texture = egg.egg_broken_texture
 		egg.update_egg_sprite()
 		egg.lives_changed.emit(egg.current_lives)
+
+
+func _on_create_lobby_button_down() -> void:
+	var message = {
+		"id" : id,
+		"message" : Message.lobby,
+		"name" : "",
+		"lobbyValue" : ""
+	}
+	peer.put_packet(JSON.stringify(message).to_utf32_buffer())
