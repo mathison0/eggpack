@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=4 uid="uid://vofywbsfj363"]
+[gd_scene load_steps=3 format=4 uid="uid://crabbcng6w8ar"]
 
 [ext_resource type="Script" uid="uid://clj031iki2qx3" path="res://scripts/levels/GameWorld.gd" id="1_84m4g"]
 [ext_resource type="PackedScene" uid="uid://twknfvlg8etj" path="res://scenes/objects/platform_tile_map.tscn" id="3_3sasu"]
