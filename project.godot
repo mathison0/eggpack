@@ -21,7 +21,7 @@ GameManager="*res://scripts/ui/GameManager.gd"
 [global_group]
 
 Ground=""
-game_manager=""
+Egg=""
 
 [physics]
 
