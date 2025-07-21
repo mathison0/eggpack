@@ -21,6 +21,7 @@ extends RigidBody2D
 var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위치
 @export var default_spawn_pos: Vector2 = Vector2(0, 0) # 초기 스폰 위치 (세이브 포인트 없을 경우)
 @export var respawn_delay: float = 3.0 # 리스폰까지 대기 시간 (계란이 깨진 후)
+@export var respawn_y_offset: float = -400.0
 
 # ================================================================
 # 목숨 시스템 변수
@@ -43,7 +44,7 @@ signal lives_changed(new_lives)
 # ================================================================
 @export var max_jetpack_fuel: float = 100.0
 @export var jetpack_fuel_consumption_rate: float = 17.0
-@export var jetpack_fuel_recharge_rate: float = 20.0
+@export var jetpack_fuel_recharge_rate: float = 30.0
 
 # 각 제트팩의 현재 연료량. 이 값은 호스트에서 계산되고 클라이언트로 동기화됩니다.
 var current_left_jetpack_fuel: float
@@ -211,6 +212,10 @@ func _physics_process(delta):
 		if is_on_ground and not any_jetpack_key_active:
 			current_left_jetpack_fuel += jetpack_fuel_recharge_rate * delta
 			current_right_jetpack_fuel += jetpack_fuel_recharge_rate * delta
+		elif not any_jetpack_key_active:
+			current_left_jetpack_fuel += jetpack_fuel_recharge_rate * delta * 0.1
+			current_right_jetpack_fuel += jetpack_fuel_recharge_rate * delta * 0.1
+			
 		
 		# 연료량이 최대/최소를 넘지 않도록 제한
 		current_left_jetpack_fuel = clampf(current_left_jetpack_fuel, 0, max_jetpack_fuel)
@@ -346,7 +351,7 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 	respawn_egg_local()
 	
 # ===============================
-# 리스폰 로직 (이전과 동일)
+# 리스폰 로직
 # ===============================
 func respawn_egg_local():
 	print("Respawning egg on peer ", multiplayer.get_unique_id(), " at ", last_save_point_pos)
@@ -364,9 +369,12 @@ func respawn_egg_local():
 	update_fuel_bars()
 
 	# 위치와 물리 상태 초기화
-	global_position = last_save_point_pos
+	global_position = last_save_point_pos + Vector2(0, respawn_y_offset)
 	linear_velocity = Vector2.ZERO
 	angular_velocity = 0.0
+	
+	set_physics_process(true)
+	
 	
 # ================================================================
 # 헬퍼(도우미) 함수들
@@ -491,7 +499,7 @@ func _on_body_exited(body: Node2D):
 	if body.is_in_group("Ground"):
 		is_on_ground = false
 		
-# NEW: 계란판(세이브 포인트) 충돌 감지
+# 계란판(세이브 포인트) 충돌 감지
 func _on_body_entered_egg_carton(body: Node2D):
 	if body.is_in_group("save_points"): # 충돌한 body가 EggCarton인지 확인
 		# 충돌한 바디가 현재 피어의 권한을 가진 달걀인지 확인 (즉, 호스트의 달걀)

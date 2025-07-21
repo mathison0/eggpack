@@ -1,16 +1,14 @@
 [gd_scene load_steps=3 format=3 uid="uid://dix3e2p42n76a"]
 
-[ext_resource type="Texture2D" uid="uid://c1okqvueq13a2" path="res://assets/graphics/save_point_img.png" id="1_yqx2y"]
+[ext_resource type="Texture2D" uid="uid://c35yv4lp3hyiu" path="res://assets/graphics/save_point_img2.png" id="1_yqx2y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v51y8"]
-size = Vector2(278, 51.5)
+size = Vector2(552, 99)
 
-[node name="SavePoint" type="Area2D" groups=["save_points"]]
+[node name="SavePoint" type="StaticBody2D" groups=["save_points"]]
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(-1, 221)
 texture = ExtResource("1_yqx2y")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-1, 219.25)
 shape = SubResource("RectangleShape2D_v51y8")
