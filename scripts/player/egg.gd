@@ -28,6 +28,7 @@ var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위
 # ================================================================
 @export var max_lives: int = 2
 var current_lives: int
+var isInvincible: bool = false
 
 # 목숨이 변경될 때 알리는 시그널 (UI 업데이트 등에 사용)
 signal lives_changed(new_lives)
@@ -355,12 +356,7 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 # ===============================
 func respawn_egg_local():
 	print("Respawning egg on peer ", multiplayer.get_unique_id(), " at ", last_save_point_pos)
-
-	# 달걀의 시각적 및 물리적 상태 초기화
-	is_broken = false
-	current_lives = max_lives # 목숨 초기화
-	lives_changed.emit(current_lives) # UI 업데이트
-	update_egg_sprite() # 온전한 달걀 스프라이트로 변경
+	isInvincible = true
 
 	jetpack_left_visuals_node.visible = true # 제트팩 시각 다시 활성화
 	jetpack_right_visuals_node.visible = true
@@ -372,9 +368,17 @@ func respawn_egg_local():
 	global_position = last_save_point_pos + Vector2(0, respawn_y_offset)
 	linear_velocity = Vector2.ZERO
 	angular_velocity = 0.0
+	rotation = 0.0
+	
+	# 달걀의 시각적 및 물리적 상태 초기화
+	is_broken = false
+	current_lives = max_lives # 목숨 초기화
+	lives_changed.emit(current_lives) # UI 업데이트
+	update_egg_sprite() # 온전한 달걀 스프라이트로 변경
 	
 	set_physics_process(true)
 	
+	isInvincible = false
 	
 # ================================================================
 # 헬퍼(도우미) 함수들
@@ -587,7 +591,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 					apply_damage(2)
 
 func apply_damage(amount: int):
-	if current_lives <= 0 or dealt_damage_this_frame:
+	if current_lives <= 0 or dealt_damage_this_frame or isInvincible:
 		return
 	
 	current_lives -= amount
