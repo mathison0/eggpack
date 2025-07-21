@@ -15,10 +15,20 @@ extends RigidBody2D
 @export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ================================================================
-# 목숨 시스템 변수 (향후 사용 가능)
+# 목숨 시스템 변수
 # ================================================================
-@export var max_lives: int = 3
+@export var max_lives: int = 2
 var current_lives: int
+
+# 목숨이 변경될 때 알리는 시그널 (UI 업데이트 등에 사용)
+signal lives_changed(new_lives)
+
+# ================================================================
+# 달걀 스프라이트 리소스 
+# ================================================================
+@export var egg_texture: Texture2D = preload("res://assets/graphics/egg/egg_img.png") # 온전한 달걀 이미지 경로
+@export var egg_cracked_texture: Texture2D = preload("res://assets/graphics/egg/egg_cracked_img.png") # 금이 간 달걀 이미지 경로
+@export var egg_broken_texture: Texture2D = preload("res://assets/graphics/egg/egg_broken_img.png") # 깨진 달걀 이미지 경로
 
 # ================================================================
 # 연료 시스템 변수
@@ -53,6 +63,8 @@ var current_right_jetpack_fuel: float
 
 # 시각 표현 관련 노드
 @onready var visuals = $Visuals
+# 달걀의 메인 스프라이트 노드 참조
+@onready var egg_main_sprite = $Visuals/Sprite2D
 
 @export var interpolation_speed = 15.0
 
@@ -103,6 +115,11 @@ func _ready():
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
 	
+	# 목숨 초기화 및 초기 달걀 스프라이트 설정
+	current_lives = max_lives
+	egg_main_sprite.texture = egg_texture # 초기 달걀은 온전한 상태
+	lives_changed.emit(current_lives) # UI에 초기 목숨 알림
+	
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# 호스트: 물리 엔진이 완전히 적용되는 Rigid 모드를 사용합니다.
 		print("This body is HOST. Mode set to RIGID.")
@@ -110,6 +127,7 @@ func _ready():
 		# 클라이언트: 물리 엔진의 영향을 받지 않는 Kinematic 모드로 설정합니다.
 		# 이렇게 하면 호스트로부터 받은 위치로만 움직이며, 독자적인 물리 계산을 하지 않습니다.
 		print("This body is CLIENT. Mode set to KINEMATIC.")
+	add_to_group("Egg")
 
 
 # ================================================================
@@ -120,6 +138,12 @@ func _physics_process(delta):
 	# RigidBody2D의 물리 계산은 오직 권한을 가진 플레이어(호스트)만 처리해야 합니다.
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# --- 호스트(P1) 로직: 입력 처리 및 물리 계산 ---
+		
+		## 목숨이 0이면 움직임을 멈춤
+		#if current_lives <= 0:
+			#linear_velocity = Vector2.ZERO
+			#angular_velocity = 0.0
+			#return # 더 이상 물리 처리 진행 안 함
 		
 		# 호스트(P1)는 자신의 입력을 직접 읽습니다.
 		var left_key_pressed = Input.is_action_pressed("ui_left")
@@ -213,7 +237,38 @@ func sync_visuals(left_fuel: float, right_fuel: float, left_on: bool, right_on: 
 		else:
 			_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
 
+# ===============================
+# NEW: RPC - 목숨 동기화
+# ===============================
+@rpc("any_peer", "reliable")
+func sync_lives(lives: int):
+	# 클라이언트에서 목숨 상태를 갱신
+	current_lives = lives
+	update_egg_sprite()
+	lives_changed.emit(current_lives)
 
+# ===============================
+# NEW: RPC - 달걀 제거 동기화
+# ===============================
+@rpc("any_peer", "reliable")
+func egg_destroy():
+	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		# ✅ 오직 호스트만 제거
+		queue_free()
+	else:
+		# ✅ 클라이언트는 스프라이트만 변경
+		egg_main_sprite.texture = egg_broken_texture
+
+# ===============================
+# NEW: RPC - 물리 비활성화 + 제거
+# (선택적으로 쓸 수 있음)
+# ===============================
+@rpc("any_peer", "reliable")
+func disable_physics_and_free():
+	self.mode = 1
+	set_physics_process(false)
+	queue_free()
+	
 # ================================================================
 # 헬퍼(도우미) 함수들
 # ================================================================
@@ -266,6 +321,14 @@ func _limit_velocities():
 	if abs(angular_velocity) > max_angular_speed:
 		angular_velocity = sign(angular_velocity) * max_angular_speed
 
+# 달걀 스프라이트를 목숨에 따라 업데이트하는 함수
+func update_egg_sprite():
+	if current_lives == 2: # 목숨이 2개일 때
+		egg_main_sprite.texture = egg_texture
+	elif current_lives == 1: # 목숨이 1개일 때
+		egg_main_sprite.texture = egg_cracked_texture
+	elif current_lives <= 0: # 목숨이 0개일 때
+		egg_main_sprite.texture = egg_broken_texture
 
 # ================================================================
 # 신호 처리 함수들
@@ -289,10 +352,53 @@ func _on_body_exited(body: Node2D):
 
 # 강한 충돌 감지 (물리 엔진 콜백, 호스트에서만 실행됨)
 func _integrate_forces(state: PhysicsDirectBodyState2D):
+	if get_multiplayer_authority() != multiplayer.get_unique_id():
+		return
+		
 	if state.get_contact_count() > 0:
 		for i in state.get_contact_count():
 			var impulse = state.get_contact_impulse(i)
-			if impulse.length() > impact_damage_threshold_speed:
-				print("강한 충돌 감지됨! 충돌 임펄스: ", impulse.length())
-				# 여기에 데미지 처리 로직 추가
-				break
+			var impact_impulse_magnitude = impulse.length()
+			
+			if impact_impulse_magnitude > 0: # 0이 아닌 임펄스만 처리
+				if impact_impulse_magnitude > impact_damage_threshold_speed:
+					print("강한 충돌 감지됨! 충돌 임펄스: ", impact_impulse_magnitude)
+				
+				var lives_lost = 0
+				if impact_impulse_magnitude >= 1500 and impact_impulse_magnitude < 3000:
+					lives_lost = 1
+				elif impact_impulse_magnitude >= 3000:
+					lives_lost = 2
+				
+				if lives_lost > 0 and current_lives > 0:
+					current_lives -= lives_lost
+					current_lives = max(0, current_lives) # 목숨이 0 미만으로 내려가지 않도록
+					print("목숨 ", lives_lost, " 감소! 남은 목숨: ", current_lives)
+					
+					lives_changed.emit(current_lives) # UI 업데이트용 시그널 발생
+					update_egg_sprite() # 달걀 스프라이트 업데이트
+					sync_lives.rpc(current_lives)
+					
+					# 목숨이 0이 되면 게임 오버 처리
+					if current_lives <= 0:
+						print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
+						egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
+						update_egg_sprite()
+						lives_changed.emit(current_lives)
+						
+						## 물리적인 움직임을 즉시 멈춥니다.
+						#linear_velocity = Vector2.ZERO
+						#angular_velocity = 0.0
+						
+						#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
+						## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
+						#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+						
+						egg_destroy.rpc() # 모든 클라이언트에게도 제거 지시
+
+						# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
+						#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
+						#queue_free() # 달걀 노드 제거
+						# 여기에 게임 오버 화면 전환, 재시작 로직 등을 추가할 수 있습니다.
+						
+						break # 한 번의 충돌로 목숨이 줄었으면 더 이상 다른 접촉 임펄스를 확인할 필요 없음
