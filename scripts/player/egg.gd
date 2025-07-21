@@ -11,6 +11,7 @@ extends RigidBody2D
 # 최대 속도 제한
 @export var max_linear_speed = 1000000.0 # 최대 선형(직선) 속도
 @export var max_angular_speed = 3000.0 # 최대 각속도 (회전 속도)
+@export var max_max_linear_speed = 1000000.0
 # 충돌 판정 관련 변수
 @export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
@@ -72,7 +73,13 @@ var current_right_jetpack_fuel: float
 # ================================================================
 # 내부 상태 변수
 # ================================================================
+@export var ice_physics_material: PhysicsMaterial
+
+@onready var tileMap = get_tree().current_scene.find_child("platformTileMap", true, false)
+var is_on_ice: bool = false
+var dealt_damage_this_frame: bool = false
 var is_on_ground: bool = false
+var can_use_jump_pad: bool = true
 
 # --- 애니메이션 상태 ---
 var left_jetpack_anim_state = false
@@ -181,6 +188,27 @@ func _physics_process(delta):
 			
 		# 속도 제한
 		_limit_velocities()
+		
+		# 미끄러짐 효과 적용
+		if is_on_ice:
+			physics_material_override = ice_physics_material
+		else:
+			physics_material_override = null
+			
+		# 바람 타일 적용
+		var tile_data = tileMap.get_cell_tile_data(tileMap.local_to_map(tileMap.to_local(global_position)))
+		
+		max_linear_speed = max_max_linear_speed
+		if tile_data:
+			if tile_data.get_custom_data("tileType") == "wind":
+				var force = tile_data.get_custom_data("wind_power")
+				apply_central_force(force)
+			
+			# 구름 타일 적용
+			if tile_data.get_custom_data("tileType") == "cloud":
+				var max_speed = tile_data.get_custom_data("max_speed")
+				max_linear_speed = max_speed
+				
 		
 		# --- 상태 동기화 ---
 		# 호스트에서 계산된 상태(연료, 제트팩 작동여부)를 모든 클라이언트에게 전송합니다.
@@ -354,9 +382,55 @@ func _on_body_exited(body: Node2D):
 func _integrate_forces(state: PhysicsDirectBodyState2D):
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
 		return
+	
+	is_on_ice = false
+	dealt_damage_this_frame = false
 		
 	if state.get_contact_count() > 0:
 		for i in state.get_contact_count():
+			# 타일 타입 가져오기
+			var collider = state.get_contact_collider_object(i)
+			var tile_type = ""
+			var tile_data
+			if collider is TileMapLayer:
+				var contact_pos_in_px = state.get_contact_collider_position(i)
+				var map_coordinates = collider.local_to_map(contact_pos_in_px)
+				tile_data = collider.get_cell_tile_data(map_coordinates)
+				if tile_data and tile_data.has_custom_data("tileType"):
+					tile_type = tile_data.get_custom_data("tileType")
+			
+			if dealt_damage_this_frame:
+				continue
+			
+			# spike 타일의 경우 닿자마자 데미지 (충돌 무관)
+			if tile_type == "spike":
+				apply_damage(2)
+				continue
+			
+			# soft 타일의 경우 충돌 판정 스킵
+			elif tile_type == "soft":
+				continue
+			
+			# ice 타일의 경우 미끄러운 상태로 만듬
+			elif tile_type == "ice":
+				is_on_ice = true
+				
+			if can_use_jump_pad and tile_type == "jump_pad":
+				var direction = tile_data.get_custom_data("launch_direction")
+				var power = tile_data.get_custom_data("launch_power")
+				
+				state.linear_velocity = state.linear_velocity * 0.2
+				
+				state.apply_central_impulse(direction.normalized() * power * -1)
+				print(direction)
+				
+				can_use_jump_pad = false
+				get_tree().create_timer(0.1).timeout.connect(func(): can_use_jump_pad = true)
+				
+				continue
+			elif tile_type == "jump_pad":
+				continue
+			
 			var impulse = state.get_contact_impulse(i)
 			var impact_impulse_magnitude = impulse.length()
 			
@@ -364,41 +438,62 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				if impact_impulse_magnitude > impact_damage_threshold_speed:
 					print("강한 충돌 감지됨! 충돌 임펄스: ", impact_impulse_magnitude)
 				
-				var lives_lost = 0
 				if impact_impulse_magnitude >= 1500 and impact_impulse_magnitude < 3000:
-					lives_lost = 1
+					apply_damage(1)
 				elif impact_impulse_magnitude >= 3000:
-					lives_lost = 2
+					apply_damage(2)
 				
-				if lives_lost > 0 and current_lives > 0:
-					current_lives -= lives_lost
-					current_lives = max(0, current_lives) # 목숨이 0 미만으로 내려가지 않도록
-					print("목숨 ", lives_lost, " 감소! 남은 목숨: ", current_lives)
-					
-					lives_changed.emit(current_lives) # UI 업데이트용 시그널 발생
-					update_egg_sprite() # 달걀 스프라이트 업데이트
-					sync_lives.rpc(current_lives)
-					
-					# 목숨이 0이 되면 게임 오버 처리
-					if current_lives <= 0:
-						print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
-						egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
-						update_egg_sprite()
-						lives_changed.emit(current_lives)
-						
-						## 물리적인 움직임을 즉시 멈춥니다.
-						#linear_velocity = Vector2.ZERO
-						#angular_velocity = 0.0
-						
-						#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
-						## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
-						#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
-						
-						egg_destroy.rpc() # 모든 클라이언트에게도 제거 지시
 
-						# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
-						#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
-						#queue_free() # 달걀 노드 제거
-						# 여기에 게임 오버 화면 전환, 재시작 로직 등을 추가할 수 있습니다.
-						
-						break # 한 번의 충돌로 목숨이 줄었으면 더 이상 다른 접촉 임펄스를 확인할 필요 없음
+func apply_damage(amount: int):
+	if current_lives <= 0 or dealt_damage_this_frame:
+		return
+	
+	current_lives -= amount
+	current_lives = max(0, current_lives) # 목숨이 0 미만으로 내려가지 않도록
+	dealt_damage_this_frame = true
+	print("목숨 ", amount, " 감소! 남은 목숨: ", current_lives)
+	
+	lives_changed.emit(current_lives) # UI 업데이트용 시그널 발생
+	update_egg_sprite() # 달걀 스프라이트 업데이트
+	sync_lives.rpc(current_lives)
+	
+	# 목숨이 0이 되면 게임 오버 처리
+	if current_lives <= 0:
+		print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
+		egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
+		update_egg_sprite()
+		lives_changed.emit(current_lives)
+		
+		## 물리적인 움직임을 즉시 멈춥니다.
+		#linear_velocity = Vector2.ZERO
+		#angular_velocity = 0.0
+		
+		#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
+		## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
+		#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+		
+		egg_destroy.rpc() # 모든 클라이언트에게도 제거 지시
+
+		# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
+		#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
+		#queue_free() # 달걀 노드 제거
+		# 여기에 게임 오버 화면 전환, 재시작 로직 등을 추가할 수 있습니다.
+
+# 연료 채우기 오브젝트 
+func refill_fuel():
+	# 호스트에서만 연료 계산을 실행
+	if not get_multiplayer_authority() == multiplayer.get_unique_id():
+		return
+
+	current_left_jetpack_fuel = max_jetpack_fuel
+	current_right_jetpack_fuel = max_jetpack_fuel
+	
+	# 변경된 연료 상태를 모든 클라이언트에게 동기화
+	# 기존에 사용하던 update_visuals_and_broadcast 함수를 재활용할 수 있습니다.
+	# 현재 제트팩이 눌렸는지 여부는 false로 보내서 분사 효과가 나가지 않게 합니다.
+	var left_key_pressed = Input.is_action_pressed("ui_left")
+	var right_key_pressed = client_right_jetpack_active
+	var can_use_left_jetpack = current_left_jetpack_fuel > 0
+	var can_use_right_jetpack = current_right_jetpack_fuel > 0
+	
+	update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_key_pressed and can_use_left_jetpack, right_key_pressed and can_use_right_jetpack)
