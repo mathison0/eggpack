@@ -37,12 +37,47 @@ var isInvincible: bool = false
 signal lives_changed(new_lives)
 
 # ================================================================
+# 높이 시스템 변수
+# ================================================================
+var current_height: float = 0.0 # 현재 달걀의 높이 (Y 좌표)
+var max_height: float = 0.0     # 기록된 최고 높이
+@onready var hud = get_tree().get_root().find_child("HUD", true, false) # HUD CanvasLayer 노드 참조
+@onready var current_height_label = hud.find_child("CurrentHeightLabel", true, false) # 현재 높이 Label 참조
+@onready var max_height_label = hud.find_child("MaxHeightLabel", true, false)       # 최고 높이 Label 참조
+
+# ================================================================
+# 게임 타이머 변수
+# ================================================================
+var game_timer: float = 0.0 # 게임 시작부터 경과된 시간
+var is_game_finished: bool = false # 게임이 종료되었는지 여부
+@onready var timer_label = hud.find_child("TimerLabel", true, false) # HUD의 타이머 Label 참조
+
+# ================================================================
+# 죽은 횟수 변수
+# ================================================================
+var death_count: int = 0
+@onready var death_count_label = hud.find_child("DeathCountLabel", true, false) # 죽은 횟수 Label 참조
+
+# ================================================================
+# 초기 스폰 후 상태 변수
+# ================================================================
+var has_touched_ground_after_spawn: bool = false # 스폰 후 바닥에 닿았는지 여부
+var ground_level_y: float = 0.0 # 달걀이 처음 바닥에 닿았을 때의 Y 좌표 (0m 기준점)
+var is_first_spawn_ground_set: bool = false # 최초 스폰 시 0m 기준점이 설정되었는지 여부
+
+# ================================================================
 # 달걀 스프라이트 리소스 
 # ================================================================
 @export var egg_texture: Texture2D = preload("res://assets/graphics/egg/egg_img.png") # 온전한 달걀 이미지 경로
 @export var egg_cracked_texture: Texture2D = preload("res://assets/graphics/egg/egg_cracked_img.png") # 금이 간 달걀 이미지 경로
 @export var egg_broken_texture: Texture2D = preload("res://assets/graphics/egg/egg_broken_img.png") # 깨진 달걀 이미지 경로
 @export var egg_fried_texture: Texture2D = preload("res://assets/graphics/egg/egg_fried.png")# 계란후라이 스프라이트 텍스처
+
+# ================================================================
+# 분리될 달걀 껍질 리소스 (새로 추가)
+# ================================================================
+@export var egg_shell_left_scene: PackedScene  # 왼쪽 달걀 껍질 씬 경로
+@export var egg_shell_right_scene: PackedScene # 오른쪽 달걀 껍질 씬 경로
 
 # ================================================================
 # 연료 시스템 변수
@@ -136,8 +171,15 @@ func _ready():
 	gravity_scale = 0.6
 	sleeping = false
 	
+	# 초기 스폰 후 바닥 닿음 상태 초기화
+	has_touched_ground_after_spawn = false
+	
 	# 초기 세이브 포인트는 기본 스폰 위치로 설정 (호스트만 초기화)
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		game_timer = 0.0
+		is_game_finished = false
+		update_timer_rpc.rpc(game_timer, is_game_finished) # 초기 상태 동기화
+		
 		last_save_point_pos = default_spawn_pos
 		# 클라이언트에게도 초기 스폰 위치와 빈 노드 경로를 동기화
 		update_save_point_rpc.rpc(default_spawn_pos)
@@ -198,6 +240,41 @@ func _physics_process(delta):
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# --- 호스트(P1) 로직: 입력 처리 및 물리 계산 ---
 		
+		# 게임 타이머 업데이트 (호스트에서만 계산)
+		if not is_game_finished:
+				game_timer += delta
+		update_timer_rpc.rpc(game_timer, is_game_finished)
+		
+		# 바닥에 닿기 전까지는 제트팩 사용 및 높이 업데이트를 막음
+		if not has_touched_ground_after_spawn:
+			# 제트팩 사용을 막기 위해 연료 소모 및 힘/토크 적용 로직을 건너뜁니다.
+			# 하지만 연료 충전은 계속되어야 하므로, 아래에서 별도로 처리합니다.
+			
+			# 바닥에 닿기 전에는 높이 업데이트를 하지 않습니다.
+			# 대신 현재 높이와 최고 높이를 0으로 표시하도록 UI를 업데이트합니다.
+			update_height_ui_rpc.rpc(0.0, 0.0) # 초기에는 0으로 표시
+			
+			# 바닥에 닿기 전에도 연료는 충전되도록 합니다.
+			# 이 부분은 기존 연료 충전 로직을 가져와서 여기에 배치합니다.
+			var any_jetpack_key_active = Input.is_action_pressed("ui_left") or client_right_jetpack_active
+			if is_on_ground and not any_jetpack_key_active:
+				current_left_jetpack_fuel += jetpack_fuel_recharge_rate * delta
+				current_right_jetpack_fuel += jetpack_fuel_recharge_rate * delta
+			elif not any_jetpack_key_active:
+				current_left_jetpack_fuel += jetpack_fuel_recharge_rate * delta * 0.1
+				current_right_jetpack_fuel += jetpack_fuel_recharge_rate * delta * 0.1
+			
+			# 연료량 제한
+			current_left_jetpack_fuel = clampf(current_left_jetpack_fuel, 0, max_jetpack_fuel)
+			current_right_jetpack_fuel = clampf(current_right_jetpack_fuel, 0, max_jetpack_fuel)
+			
+			# UI 업데이트 (모든 클라이언트에게 동기화) - 제트팩은 꺼진 상태로 보냄
+			update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, false, false)
+			
+			visuals.global_position = global_position
+			visuals.global_rotation = global_rotation
+			return # 바닥에 닿기 전까지는 더 이상 물리 처리 진행 안 함
+		
 		## 목숨이 0이면 움직임을 멈춤
 		#if current_lives <= 0:
 			#linear_velocity = Vector2.ZERO
@@ -254,6 +331,8 @@ func _physics_process(delta):
 		# 연료량이 최대/최소를 넘지 않도록 제한
 		current_left_jetpack_fuel = clampf(current_left_jetpack_fuel, 0, max_jetpack_fuel)
 		current_right_jetpack_fuel = clampf(current_right_jetpack_fuel, 0, max_jetpack_fuel)
+		
+		
 
 		# 계산된 총 토크를 적용
 		if total_torque_to_apply != 0.0:
@@ -295,6 +374,20 @@ func _physics_process(delta):
 			GameManager.cloud_slow_down(true)
 		else:
 			GameManager.cloud_slow_down(false)
+			
+		# --- 높이 업데이트 로직 (호스트에서만 계산) ---
+		# Y값이 작아질수록 (위로 올라갈수록) 높이가 커지도록 계산합니다.
+		# ground_level_y를 기준으로 삼아 0m부터 시작하게 합니다.
+		current_height = ground_level_y - global_position.y
+		
+		if current_height < 0: # 0m 아래로 내려가면 음수로 표시하지 않고 0으로 고정
+			current_height = 0.0
+
+		if current_height > max_height:
+			max_height = current_height
+
+		# UI 업데이트 (모든 클라이언트에게 동기화)
+		update_height_ui_rpc.rpc(current_height, max_height)
 				
 		
 		# --- 상태 동기화 ---
@@ -306,16 +399,28 @@ func _physics_process(delta):
 		visuals.global_rotation = global_rotation
 	else:
 		# --- 클라이언트(P2) 로직: 자신의 입력 상태를 호스트에게 전송 ---
-		var right_pressed = Input.is_action_pressed("ui_right")
-		# 입력 상태가 이전 프레임과 달라졌을 때만 RPC를 호출하여 네트워크 트래픽을 줄입니다.
-		if right_pressed != _client_previous_input_state:
-			# rpc_id(1, ...)은 ID가 1인 피어(호스트)에게만 RPC를 보냅니다.
-			set_client_jetpack_input.rpc(right_pressed)
-			_client_previous_input_state = right_pressed
+		# 클라이언트도 바닥에 닿기 전까지는 제트팩 입력을 보내지 않음
+		if has_touched_ground_after_spawn: # <--- 이 조건 추가
+			var right_pressed = Input.is_action_pressed("ui_right")
+			# 입력 상태가 이전 프레임과 달라졌을 때만 RPC를 호출하여 네트워크 트래픽을 줄입니다.
+			if right_pressed != _client_previous_input_state:
+				# rpc_id(1, ...)은 ID가 1인 피어(호스트)에게만 RPC를 보냅니다.
+				set_client_jetpack_input.rpc(right_pressed)
+				_client_previous_input_state = right_pressed
+		else: # 바닥에 닿기 전에는 제트팩 입력 상태를 항상 false로 유지
+			if _client_previous_input_state: # 이전에 true였다면 false로 변경 RPC 전송
+				set_client_jetpack_input.rpc(false)
+				_client_previous_input_state = false
 
 # 클라이언트의 시각 위치 보간
 func _process(delta):
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
+		# 클라이언트에서도 has_touched_ground_after_spawn이 false일 때 높이를 0으로 표시
+		if not has_touched_ground_after_spawn:
+			if current_height_label:
+				current_height_label.text = "현재 높이: %.2f m" % 0.0
+			if max_height_label:
+				max_height_label.text = "최고 높이: %.2f m" % 0.0
 		visuals.global_position = visuals.global_position.lerp(global_position, delta * interpolation_speed)
 		visuals.global_rotation = lerp_angle(visuals.global_rotation, global_rotation, delta * interpolation_speed)
 
@@ -363,7 +468,7 @@ func sync_lives(lives: int):
 	lives_changed.emit(current_lives)
 	
 # ===============================
-# RPC - 세이브 포인트 동기화 및 시각 효과 업데이트
+# RPC - 세이브 포인트 동기화
 # ===============================
 @rpc("any_peer", "reliable")
 func update_save_point_rpc(pos: Vector2):
@@ -392,6 +497,10 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 	_spawn_jetpack_local(true, egg_global_pos, egg_linear_vel, egg_angular_vel) # 왼쪽 제트팩 스폰
 	_spawn_jetpack_local(false, egg_global_pos, egg_linear_vel, egg_angular_vel) # 오른쪽 제트팩 스폰
 	
+	# 달걀 껍질 스폰
+	_spawn_egg_shell_local(true, egg_global_pos, egg_linear_vel, egg_angular_vel) # 왼쪽 달걀 껍질 스폰
+	_spawn_egg_shell_local(false, egg_global_pos, egg_linear_vel, egg_angular_vel) # 오른쪽 달걀 껍질 스폰
+	
 	# 달걀 노드 자체는 파괴된 후 잠시 후 리스폰
 	await get_tree().create_timer(respawn_delay).timeout # 설정된 리스폰 대기 시간만큼 대기
 	
@@ -411,6 +520,49 @@ func change_to_egg_fried_sprite():
 		print("Egg sprite changed to Fried Egg on peer ", multiplayer.get_unique_id())
 	else:
 		print("Fried Egg Texture is not assigned!")
+		
+# ===============================
+# RPC - 높이 UI 동기화
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func update_height_ui_rpc(current_h: float, max_h: float):
+	# 모든 피어에서 UI 업데이트
+	if current_height_label: # 노드가 있는지 안전하게 확인
+		current_height_label.text = "현재 높이: %.2f m" %(current_h / 100.0)
+	if max_height_label: # 노드가 있는지 안전하게 확인
+		max_height_label.text = "최고 높이: %.2f m" % (max_h / 100.0)
+		
+# ===============================
+# RPC - 죽은 횟수 동기화
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func sync_death_count_rpc(count: int):
+	# 모든 피어에서 UI 업데이트
+	if death_count_label: # 노드가 있는지 안전하게 확인
+		death_count_label.text = "깨진 횟수: %d번" % count
+		
+# ===============================
+# RPC - 스폰 후 바닥 닿음 상태 동기화
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func sync_has_touched_ground_rpc(state: bool):
+	has_touched_ground_after_spawn = state
+	print("Peer ", multiplayer.get_unique_id(), " has_touched_ground_after_spawn set to: ", state)
+	
+	# ===============================
+# RPC - 타이머 동기화 (새로 추가)
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func update_timer_rpc(time: float, finished: bool):
+	# 모든 피어에서 타이머 값과 상태를 갱신
+	game_timer = time
+	is_game_finished = finished
+
+	if timer_label: # 노드가 있는지 안전하게 확인
+		var minutes = floor(game_timer / 60)
+		var seconds = fmod(game_timer, 60)
+		var milliseconds = fmod(game_timer * 1000, 1000)
+		timer_label.text = "시간: %02d:%02d.%03d" % [minutes, seconds, milliseconds]
 	
 # ===============================
 # 리스폰 로직
@@ -436,6 +588,9 @@ func respawn_egg_local():
 	current_lives = max_lives # 목숨 초기화
 	lives_changed.emit(current_lives) # UI 업데이트
 	update_egg_sprite() # 온전한 달걀 스프라이트로 변경
+	
+	# 리스폰 후 바닥 닿음 상태 초기화
+	has_touched_ground_after_spawn = true
 	
 	set_physics_process(true)
 	
@@ -539,10 +694,53 @@ func _spawn_jetpack_local(is_left: bool, egg_global_pos: Vector2, egg_linear_vel
 
 		# 일정 시간 후 제트팩 제거 (메모리 관리)
 		var timer = Timer.new()
-		timer.wait_time = 10.0 # 10초 후 제거
+		timer.wait_time = 8.0 # 8초 후 제거
 		timer.one_shot = true
 		jetpack_instance.add_child(timer)
 		timer.timeout.connect(jetpack_instance.queue_free)
+		timer.start()
+
+# ================================================================
+# 달걀 껍질 파편 분리 함수 (새로 추가)
+# ================================================================
+func _spawn_egg_shell_local(is_left: bool, egg_global_pos: Vector2, egg_linear_vel: Vector2, egg_angular_vel: float):
+	var shell_scene: PackedScene = null
+	var spawn_offset: Vector2 = Vector2.ZERO
+	var initial_velocity_offset: Vector2 = Vector2.ZERO
+
+	if is_left:
+		shell_scene = egg_shell_left_scene
+		# 달걀 중심에서 왼쪽으로 약간 떨어진 위치
+		spawn_offset = Vector2(-5, 0) # 제트팩과 겹치지 않게 조절 필요
+		# 왼쪽 위로 분산되는 속도 (제트팩과 다르게 설정 가능)
+		initial_velocity_offset = Vector2(-randf_range(20, 50), randf_range(-20, -60))
+	else:
+		shell_scene = egg_shell_right_scene
+		# 달걀 중심에서 오른쪽으로 약간 떨어진 위치
+		spawn_offset = Vector2(5, 0) # 제트팩과 겹치지 않게 조절 필요
+		# 오른쪽 위로 분산되는 속도 (제트팩과 다르게 설정 가능)
+		initial_velocity_offset = Vector2(randf_range(20, 50), randf_range(-20, -60))
+
+	if shell_scene:
+		var shell_instance = shell_scene.instantiate()
+		get_tree().get_root().add_child(shell_instance) # 씬 트리의 루트에 추가
+
+		# 중요: 스폰된 껍질의 네트워크 권한을 호스트에게 부여합니다.
+		shell_instance.set_multiplayer_authority(GameManager.host_id)
+		
+		# 전달받은 초기 위치, 속도, 각속도 적용
+		shell_instance.global_position = egg_global_pos + spawn_offset
+		shell_instance.linear_velocity = egg_linear_vel * 0.5 + initial_velocity_offset # 달걀의 속도를 덜 받도록
+		shell_instance.angular_velocity = egg_angular_vel + randf_range(-5, 5) # 약간의 무작위 각속도 추가
+
+		print("Spawned egg shell (is_left: ", is_left, ") on peer ID: ", multiplayer.get_unique_id(), ", Authority: ", shell_instance.get_multiplayer_authority())
+
+		# 일정 시간 후 껍질 제거 (메모리 관리)
+		var timer = Timer.new()
+		timer.wait_time = 8.0
+		timer.one_shot = true
+		shell_instance.add_child(timer)
+		timer.timeout.connect(shell_instance.queue_free)
 		timer.start()
 
 	
@@ -562,6 +760,17 @@ func _on_any_body_entered(body: Node2D):
 	# 일반 바닥 충돌 감지
 	if body.is_in_group("Ground"):
 		is_on_ground = true
+		# 스폰 후 첫 바닥 접촉 감지 (호스트만 처리)
+		if get_multiplayer_authority() == multiplayer.get_unique_id():
+			if not has_touched_ground_after_spawn:
+				has_touched_ground_after_spawn = true
+				sync_has_touched_ground_rpc.rpc(true) # 모든 피어에 동기화
+				# --- 최초 스폰 시에만 0m 기준점 설정 ---
+				if not is_first_spawn_ground_set: # <--- 이 조건 덕분에 딱 한 번만 실행됩니다.
+					ground_level_y = global_position.y
+					is_first_spawn_ground_set = true
+					print("Initial Ground level set at Y: ", ground_level_y)
+					update_height_ui_rpc.rpc(0.0, 0.0)
 
 	# 계란판(세이브 포인트) 충돌 감지
 	# `Area2D`인 계란판이 "save_points" 그룹에 있고, 현재 달걀이 호스트의 권한을 가질 때
@@ -574,6 +783,19 @@ func _on_any_body_entered(body: Node2D):
 			print("Host Egg reached new save point: ", new_save_pos)
 			last_save_point_pos = new_save_pos
 			update_save_point_rpc.rpc(last_save_point_pos)
+			
+		# --- 리스폰 후 세이브 포인트에 닿았을 때 움직임 활성화 및 기준점 설정 ---
+		# 호스트가 save_points에 닿았을 때 has_touched_ground_after_spawn 활성화
+		if not has_touched_ground_after_spawn:
+			has_touched_ground_after_spawn = true
+			sync_has_touched_ground_rpc.rpc(true) # 모든 피어에 동기화
+			
+			# --- 최초 스폰 시에만 0m 기준점 설정 ---
+			if not is_first_spawn_ground_set:
+				ground_level_y = global_position.y
+				is_first_spawn_ground_set = true
+				print("Initial Ground level set at Y (via save point): ", ground_level_y)
+				update_height_ui_rpc.rpc(0.0, 0.0)
 
 	# 엔딩 착륙 지점(Area2D)과의 충돌 감지
 	# `Area2D` 타입이면서 EndingLandingZone 레이어에 속하고, 현재 달걀이 호스트의 권한을 가질 때
@@ -589,6 +811,11 @@ func _on_any_body_entered(body: Node2D):
 		linear_velocity = Vector2.ZERO
 		angular_velocity = 0.0
 		rotation = 0.0
+		
+		# 게임 종료 플래그 설정 및 최종 시간 동기화 (호스트만)
+		is_game_finished = true
+		update_timer_rpc.rpc(game_timer, is_game_finished) # 최종 시간 동기화
+		print("Game Finished! Elapsed Time: ", game_timer)
 
 
 func _on_body_exited(body: Node2D):
@@ -687,7 +914,6 @@ func apply_damage(amount: int):
 	# 목숨이 0이 되면 게임 오버 처리
 	if current_lives <= 0:
 		print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
-		egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
 		update_egg_sprite()
 		lives_changed.emit(current_lives)
 		
@@ -699,6 +925,11 @@ func apply_damage(amount: int):
 		#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
 		## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
 		#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+		
+		# --- 깨진 횟수 증가 및 동기화 ---
+		if get_multiplayer_authority() == multiplayer.get_unique_id(): # 호스트만 카운트 증가
+			death_count += 1
+			sync_death_count_rpc.rpc(death_count) # 모든 피어에 동기화
 		
 		command_egg_destroy_and_spawn_jetpacks.rpc(global_position, linear_velocity, angular_velocity)
 

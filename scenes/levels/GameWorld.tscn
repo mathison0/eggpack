@@ -109,4 +109,46 @@ position = Vector2(576, -6848)
 position = Vector2(1538, -7046)
 
 [node name="Ending" parent="." instance=ExtResource("9_fdut3")]
+
 position = Vector2(-495, -7969)
+
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HeightDisplay" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CurrentHeightLabel" type="Label" parent="HUD/HeightDisplay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 117.0
+offset_bottom = 38.0
+text = "현재 높이: 0m"
+
+[node name="MaxHeightLabel" type="Label" parent="HUD/HeightDisplay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 45.0
+offset_right = 117.0
+offset_bottom = 68.0
+text = "최고 높이: 0m"
+
+[node name="DeathCountLabel" type="Label" parent="HUD/HeightDisplay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 75.0
+offset_right = 117.0
+offset_bottom = 98.0
+text = "깨진 횟수: 0번"
+
+[node name="TimerLabel" type="Label" parent="HUD"]
+offset_left = 15.0
+offset_top = 105.0
+offset_right = 129.0
+offset_bottom = 128.0
+text = "시간: 00:00.000"
+>>>>>>> feature/HUD
