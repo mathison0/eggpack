@@ -10,7 +10,7 @@ var jetpack_thrust_vertical
 @export var jetpack_torque_amount = 200.0
 # 최대 속도 제한
 @export var max_linear_speed = 50.0 # 최대 선형(직선) 속도
-@export var max_angular_speed = 100.0 # 최대 각속도 (회전 속도)
+@export var max_angular_speed = 70.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 10000.0
 @export var max_both_jetpack_speed = 100
 @export var max_sole_jetpack_speed = 150
