@@ -19,7 +19,7 @@ tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 65536, 0, 65537, 65536, 2,
 tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 5, 1, 196608, 4, 65537, 196608, 5)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aoaae"]
-friction = 0.6
+friction = 0.35
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_aoaae"]
 texture = ExtResource("1_bh2xx")
