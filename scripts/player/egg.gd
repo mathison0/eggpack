@@ -12,8 +12,8 @@ var jetpack_thrust_vertical
 @export var max_linear_speed = 50.0 # 최대 선형(직선) 속도
 @export var max_angular_speed = 200.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 10000.0
-@export var max_both_jetpack_speed = 150
-@export var max_sole_jetpack_speed = 200
+@export var max_both_jetpack_speed = 100
+@export var max_sole_jetpack_speed = 150
 # 충돌 판정 관련 변수
 @export var impact_damage_threshold_speed: float = 200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
@@ -131,7 +131,7 @@ func _ready():
 	jetpack_right_sprite.visible = true
 	
 	# 물리 속성 초기화
-	gravity_scale = 0.8
+	gravity_scale = 0.6
 	sleeping = false
 	
 	# 초기 세이브 포인트는 기본 스폰 위치로 설정 (호스트만 초기화)
