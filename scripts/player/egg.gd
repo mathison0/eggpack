@@ -46,6 +46,13 @@ var max_height: float = 0.0     # 기록된 최고 높이
 @onready var max_height_label = hud.find_child("MaxHeightLabel", true, false)       # 최고 높이 Label 참조
 
 # ================================================================
+# 게임 타이머 변수
+# ================================================================
+var game_timer: float = 0.0 # 게임 시작부터 경과된 시간
+var is_game_finished: bool = false # 게임이 종료되었는지 여부
+@onready var timer_label = hud.find_child("TimerLabel", true, false) # HUD의 타이머 Label 참조
+
+# ================================================================
 # 죽은 횟수 변수
 # ================================================================
 var death_count: int = 0
@@ -167,6 +174,10 @@ func _ready():
 	
 	# 초기 세이브 포인트는 기본 스폰 위치로 설정 (호스트만 초기화)
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
+		game_timer = 0.0
+		is_game_finished = false
+		update_timer_rpc.rpc(game_timer, is_game_finished) # 초기 상태 동기화
+		
 		last_save_point_pos = default_spawn_pos
 		# 클라이언트에게도 초기 스폰 위치와 빈 노드 경로를 동기화
 		update_save_point_rpc.rpc(default_spawn_pos)
@@ -224,6 +235,11 @@ func _physics_process(delta):
 	# RigidBody2D의 물리 계산은 오직 권한을 가진 플레이어(호스트)만 처리해야 합니다.
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
 		# --- 호스트(P1) 로직: 입력 처리 및 물리 계산 ---
+		
+		# 게임 타이머 업데이트 (호스트에서만 계산)
+		if not is_game_finished:
+				game_timer += delta
+		update_timer_rpc.rpc(game_timer, is_game_finished)
 		
 		# 바닥에 닿기 전까지는 제트팩 사용 및 높이 업데이트를 막음
 		if not has_touched_ground_after_spawn:
@@ -522,6 +538,21 @@ func sync_has_touched_ground_rpc(state: bool):
 	has_touched_ground_after_spawn = state
 	print("Peer ", multiplayer.get_unique_id(), " has_touched_ground_after_spawn set to: ", state)
 	
+	# ===============================
+# RPC - 타이머 동기화 (새로 추가)
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func update_timer_rpc(time: float, finished: bool):
+	# 모든 피어에서 타이머 값과 상태를 갱신
+	game_timer = time
+	is_game_finished = finished
+
+	if timer_label: # 노드가 있는지 안전하게 확인
+		var minutes = floor(game_timer / 60)
+		var seconds = fmod(game_timer, 60)
+		var milliseconds = fmod(game_timer * 1000, 1000)
+		timer_label.text = "시간: %02d:%02d.%03d" % [minutes, seconds, milliseconds]
+	
 # ===============================
 # 리스폰 로직
 # ===============================
@@ -768,6 +799,11 @@ func _on_any_body_entered(body: Node2D):
 		linear_velocity = Vector2.ZERO
 		angular_velocity = 0.0
 		rotation = 0.0
+		
+		# 게임 종료 플래그 설정 및 최종 시간 동기화 (호스트만)
+		is_game_finished = true
+		update_timer_rpc.rpc(game_timer, is_game_finished) # 최종 시간 동기화
+		print("Game Finished! Elapsed Time: ", game_timer)
 
 
 func _on_body_exited(body: Node2D):

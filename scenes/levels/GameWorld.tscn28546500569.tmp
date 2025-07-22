@@ -91,7 +91,7 @@ offset_right = 117.0
 offset_bottom = 98.0
 text = "깨진 횟수: 0번"
 
-[node name="TimerLabel" type="Label" parent="HUD"]
+[node name="TimeLabel" type="Label" parent="HUD"]
 offset_left = 15.0
 offset_top = 105.0
 offset_right = 129.0
