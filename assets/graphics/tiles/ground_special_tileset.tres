@@ -387,6 +387,26 @@ texture_region_size = Vector2i(320, 320)
 21:6/0 = 0
 21:6/0/custom_data_0 = "cloud"
 21:6/0/custom_data_4 = 500.0
+23:4/size_in_atlas = Vector2i(2, 2)
+23:4/animation_speed = 12.0
+23:4/animation_frame_0/duration = 1.0
+23:4/animation_frame_1/duration = 1.0
+23:4/animation_frame_2/duration = 1.0
+23:4/animation_frame_3/duration = 1.0
+23:4/animation_frame_4/duration = 1.0
+23:4/animation_frame_5/duration = 1.0
+23:4/animation_frame_6/duration = 1.0
+23:4/0 = 0
+23:6/size_in_atlas = Vector2i(2, 2)
+23:6/animation_speed = 12.0
+23:6/animation_frame_0/duration = 1.0
+23:6/animation_frame_1/duration = 1.0
+23:6/animation_frame_2/duration = 1.0
+23:6/animation_frame_3/duration = 1.0
+23:6/animation_frame_4/duration = 1.0
+23:6/animation_frame_5/duration = 1.0
+23:6/animation_frame_6/duration = 1.0
+23:6/0 = 0
 
 [resource]
 tile_size = Vector2i(320, 320)
