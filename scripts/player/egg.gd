@@ -5,12 +5,12 @@ extends RigidBody2D
 # 플레이어 설정 변수들
 # ================================================================
 # 제트팩 분사 시 상승하는 힘
-@export var jetpack_thrust_vertical = 200.0
+@export var jetpack_thrust_vertical = 150.0
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
 @export var jetpack_torque_amount = 200.0
 # 최대 속도 제한
-@export var max_linear_speed = 5000.0 # 최대 선형(직선) 속도
-@export var max_angular_speed = 500.0 # 최대 각속도 (회전 속도)
+@export var max_linear_speed = 1000.0 # 최대 선형(직선) 속도
+@export var max_angular_speed = 200.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 10000.0
 # 충돌 판정 관련 변수
 @export var impact_damage_threshold_speed: float = 200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
