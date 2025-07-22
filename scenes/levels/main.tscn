@@ -11,6 +11,6 @@ rotation = 0.0080111
 gravity_scale = 8.0
 linear_damp = 0.0
 max_linear_speed = 50.0
-max_angular_speed = 100.0
+max_angular_speed = 70.0
 
 [node name="platformTileMap" parent="." instance=ExtResource("2_2vj2h")]
