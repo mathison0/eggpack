@@ -26,7 +26,8 @@ properties/3/replication_mode = 1
 texture = ExtResource("1_ugyl7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(2, -31)
+position = Vector2(0.4, -6.2)
+scale = Vector2(0.2, 0.2)
 shape = SubResource("CapsuleShape2D_b4tvo")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
