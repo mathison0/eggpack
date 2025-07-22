@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://db4x7lrv8ecl8"]
 
 [ext_resource type="Texture2D" uid="uid://j422rkjy18pf" path="res://assets/graphics/objects/FuelPickup.png" id="1_3wto0"]
-[ext_resource type="Script" path="res://scripts/objects/fuel_pickup.gd" id="2_v7me0"]
+[ext_resource type="Script" uid="uid://bioafi6pf2nem" path="res://scripts/objects/fuel_pickup.gd" id="2_v7me0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v7me0"]
 size = Vector2(31, 49)

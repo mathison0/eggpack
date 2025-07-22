@@ -32,6 +32,7 @@ func remove_status(status_effect: Status):
 
 func remove_status_all():
 	active_status = []
+	is_control_swapped = false
 	status_effect_changed.emit(active_status)		
 	sync_status_update.rpc(active_status)
 
