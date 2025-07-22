@@ -1,39 +1,39 @@
 [gd_scene load_steps=19 format=3 uid="uid://drncxglbgtyi8"]
 
-[ext_resource type="Script" path="res://scripts/objects/swap_portal.gd" id="1_0vg43"]
+[ext_resource type="Script" uid="uid://00xj7yrftyx4" path="res://scripts/objects/swap_portal.gd" id="1_0vg43"]
 [ext_resource type="Texture2D" uid="uid://dc04ytnirae7w" path="res://assets/graphics/objects/SwapPortal.png" id="1_pc8e0"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0vg43"]
-radius = 60.0
-height = 610.0
+radius = 11.0
+height = 128.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0vg43"]
+atlas = ExtResource("1_pc8e0")
+region = Rect2(0, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1746u"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(0, 0, 640, 640)
+region = Rect2(128, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q6h1s"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(640, 0, 640, 640)
+region = Rect2(256, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_1fxl4"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(1280, 0, 640, 640)
+region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_evfvs"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(1920, 0, 640, 640)
+region = Rect2(512, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_a752h"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(2560, 0, 640, 640)
+region = Rect2(640, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_t0ggk"]
 atlas = ExtResource("1_pc8e0")
-region = Rect2(3200, 0, 640, 640)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_xlaum"]
-atlas = ExtResource("1_pc8e0")
-region = Rect2(3840, 0, 640, 640)
+region = Rect2(768, 0, 128, 128)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bfx87"]
 atlas = ExtResource("1_pc8e0")
@@ -67,6 +67,9 @@ region = Rect2(3840, 640, 640, 640)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_0vg43")
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_1746u")
 }, {
 "duration": 1.0,
@@ -83,9 +86,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_t0ggk")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_xlaum")
 }],
 "loop": true,
 "name": &"horizontal",

@@ -25,25 +25,25 @@ tile_map_data = PackedByteArray("AAAH/4b/AAAAAAAAAAAI/4b/AAABAAAAAAAH/4f/AAAAAAA
 tile_set = ExtResource("4_o8t00")
 
 [node name="FuelPickup" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-6007, -11206)
+position = Vector2(-1269, -2244)
 
 [node name="FuelPickup2" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-4137, -12605)
+position = Vector2(-830, -2537)
 
 [node name="FuelPickup3" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-16128, -12545)
+position = Vector2(-3125, -2522)
 
 [node name="FuelPickup4" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-15152, -12543)
+position = Vector2(-5, -4161)
 
 [node name="FuelPickup5" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-15649, -12542)
+position = Vector2(1087, -3019)
 
 [node name="FuelPickup6" parent="." instance=ExtResource("5_ihn80")]
-position = Vector2(-9, -19770)
+position = Vector2(1093, -2363)
 
 [node name="SwapPortal" parent="." instance=ExtResource("8_dhmek")]
-position = Vector2(-4942, -18402)
+position = Vector2(-818, -3678)
 
 [node name="SwapPortal2" parent="." instance=ExtResource("8_dhmek")]
-position = Vector2(3028, -18378)
+position = Vector2(582, -3676)
