@@ -63,25 +63,30 @@ position = Vector2(31, -4894)
 
 [node name="HeightDisplay" type="Control" parent="HUD"]
 layout_mode = 3
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -40.0
+anchors_preset = 0
+offset_right = 40.0
 offset_bottom = 40.0
-grow_horizontal = 0
 
 [node name="CurrentHeightLabel" type="Label" parent="HUD/HeightDisplay"]
 layout_mode = 0
-offset_left = -70.0
+offset_left = 15.0
 offset_top = 15.0
-offset_right = 32.0
+offset_right = 117.0
 offset_bottom = 38.0
 text = "현재 높이: 0m"
 
 [node name="MaxHeightLabel" type="Label" parent="HUD/HeightDisplay"]
 layout_mode = 0
-offset_left = -70.0
-offset_top = 40.0
-offset_right = 32.0
-offset_bottom = 63.0
+offset_left = 15.0
+offset_top = 45.0
+offset_right = 117.0
+offset_bottom = 68.0
 text = "최고 높이: 0m"
+
+[node name="DeathCountLabel" type="Label" parent="HUD/HeightDisplay"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 75.0
+offset_right = 117.0
+offset_bottom = 98.0
+text = "깨진 횟수: 0번"

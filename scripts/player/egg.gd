@@ -46,6 +46,17 @@ var max_height: float = 0.0     # 기록된 최고 높이
 @onready var max_height_label = hud.find_child("MaxHeightLabel", true, false)       # 최고 높이 Label 참조
 
 # ================================================================
+# 죽은 횟수 변수
+# ================================================================
+var death_count: int = 0
+@onready var death_count_label = hud.find_child("DeathCountLabel", true, false) # 죽은 횟수 Label 참조
+
+# ================================================================
+# 초기 스폰 후 상태 변수
+# ================================================================
+var has_touched_ground_after_spawn: bool = false # 스폰 후 바닥에 닿았는지 여부
+
+# ================================================================
 # 달걀 스프라이트 리소스 
 # ================================================================
 @export var egg_texture: Texture2D = preload("res://assets/graphics/egg/egg_img.png") # 온전한 달걀 이미지 경로
@@ -142,6 +153,9 @@ func _ready():
 	# 물리 속성 초기화
 	gravity_scale = 0.6
 	sleeping = false
+	
+	# 초기 스폰 후 바닥 닿음 상태 초기화
+	has_touched_ground_after_spawn = false
 	
 	# 초기 세이브 포인트는 기본 스폰 위치로 설정 (호스트만 초기화)
 	if get_multiplayer_authority() == multiplayer.get_unique_id():
@@ -429,9 +443,18 @@ func change_to_egg_fried_sprite():
 func update_height_ui_rpc(current_h: float, max_h: float):
 	# 모든 피어에서 UI 업데이트
 	if current_height_label: # 노드가 있는지 안전하게 확인
-		current_height_label.text = "현재 높이: %d m" % int(current_h)
+		current_height_label.text = "현재 높이: %.2f m" %(current_h / 100.0)
 	if max_height_label: # 노드가 있는지 안전하게 확인
-		max_height_label.text = "최고 높이: %d m" % int(max_h)
+		max_height_label.text = "최고 높이: %.2f m" % (max_h / 100.0)
+		
+# ===============================
+# RPC - 죽은 횟수 동기화
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func sync_death_count_rpc(count: int):
+	# 모든 피어에서 UI 업데이트
+	if death_count_label: # 노드가 있는지 안전하게 확인
+		death_count_label.text = "깨진 횟수: %d번" % count
 	
 # ===============================
 # 리스폰 로직
@@ -707,7 +730,6 @@ func apply_damage(amount: int):
 	# 목숨이 0이 되면 게임 오버 처리
 	if current_lives <= 0:
 		print("목숨이 0이 되어 게임 오버! 달걀이 파괴됩니다.")
-		egg_main_sprite.texture = egg_broken_texture # 깨진 달걀 스프라이트 최종 적용
 		update_egg_sprite()
 		lives_changed.emit(current_lives)
 		
@@ -718,6 +740,11 @@ func apply_damage(amount: int):
 		#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
 		## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!
 		#set_physics_process(false) # 더 이상 물리 처리 업데이트를 하지 않음
+		
+		# --- 깨진 횟수 증가 및 동기화 ---
+		if get_multiplayer_authority() == multiplayer.get_unique_id(): # 호스트만 카운트 증가
+			death_count += 1
+			sync_death_count_rpc.rpc(death_count) # 모든 피어에 동기화
 		
 		command_egg_destroy_and_spawn_jetpacks.rpc(global_position, linear_velocity, angular_velocity)
 
