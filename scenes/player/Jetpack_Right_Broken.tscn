@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cjwnd6y3fgbn8"]
 
-[ext_resource type="Texture2D" uid="uid://c1rww8piheekw" path="res://assets/graphics/jetpack/jetpack_right.png" id="1_ugyl7"]
+[ext_resource type="Texture2D" uid="uid://duuxs78i2y1oi" path="res://assets/graphics/jetpack/jetpack_right.png" id="1_ugyl7"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_b4tvo"]
 radius = 69.0

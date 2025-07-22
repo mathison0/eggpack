@@ -1,6 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://dix3e2p42n76a"]
-
-[ext_resource type="Texture2D" uid="uid://c35yv4lp3hyiu" path="res://assets/graphics/save_point_img2.png" id="1_yqx2y"]
+[gd_scene load_steps=2 format=3 uid="uid://dix3e2p42n76a"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_v51y8"]
 size = Vector2(552, 99)
@@ -10,7 +8,6 @@ collision_layer = 16
 collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("1_yqx2y")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_v51y8")

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
-[ext_resource type="Texture2D" uid="uid://cg7xtnwthcnrq" path="res://assets/graphics/logo.png" id="2_yl8f6"]
+[ext_resource type="Texture2D" uid="uid://kgcpogmvdau7" path="res://assets/graphics/logo.png" id="2_yl8f6"]
 [ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
 
 [node name="Control" type="Control"]

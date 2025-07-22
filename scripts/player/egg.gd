@@ -5,15 +5,15 @@ extends RigidBody2D
 # 플레이어 설정 변수들
 # ================================================================
 # 제트팩 분사 시 상승하는 힘
-@export var jetpack_thrust_vertical = 1500.0
+@export var jetpack_thrust_vertical = 300.0
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
-@export var jetpack_torque_amount = 25000.0
+@export var jetpack_torque_amount = 200.0
 # 최대 속도 제한
-@export var max_linear_speed = 1000000.0 # 최대 선형(직선) 속도
-@export var max_angular_speed = 3000.0 # 최대 각속도 (회전 속도)
-@export var max_max_linear_speed = 1000000.0
+@export var max_linear_speed = 200000.0 # 최대 선형(직선) 속도
+@export var max_angular_speed = 600.0 # 최대 각속도 (회전 속도)
+@export var max_max_linear_speed = 200000.0
 # 충돌 판정 관련 변수
-@export var impact_damage_threshold_speed: float = 1500.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
+@export var impact_damage_threshold_speed: float = 300.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ================================================================
 # 세이브 포인트 및 리스폰 변수
@@ -21,7 +21,7 @@ extends RigidBody2D
 var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위치
 @export var default_spawn_pos: Vector2 = Vector2(0, 0) # 초기 스폰 위치 (세이브 포인트 없을 경우)
 @export var respawn_delay: float = 3.0 # 리스폰까지 대기 시간 (계란이 깨진 후)
-@export var respawn_y_offset: float = -400.0
+@export var respawn_y_offset: float = -20.0
 @export var respawn_invincible_duration: float = 0.5 # 리스폰 후 무적 시간
 
 # ================================================================
@@ -495,11 +495,11 @@ func _spawn_jetpack_local(is_left: bool, egg_global_pos: Vector2, egg_linear_vel
 	if is_left:
 		jetpack_scene = jetpack_left_broken_scene
 		spawn_offset = Vector2(-15, 0) # 달걀 중심에서 왼쪽으로 약간 떨어진 위치
-		initial_velocity_offset = Vector2(-randf_range(50, 150), randf_range(-50, -150)) # 왼쪽 위로 분산되는 속도
+		initial_velocity_offset = Vector2(-randf_range(10, 30), randf_range(-10, -30)) # 왼쪽 위로 분산되는 속도
 	else:
 		jetpack_scene = jetpack_right_broken_scene
 		spawn_offset = Vector2(15, 0) # 달걀 중심에서 오른쪽으로 약간 떨어진 위치
-		initial_velocity_offset = Vector2(randf_range(50, 150), randf_range(-50, -150)) # 오른쪽 위로 분산되는 속도
+		initial_velocity_offset = Vector2(randf_range(10, 30), randf_range(-10, -30)) # 오른쪽 위로 분산되는 속도
 
 	if jetpack_scene:
 		var jetpack_instance = jetpack_scene.instantiate()
@@ -646,9 +646,9 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				if impact_impulse_magnitude > impact_damage_threshold_speed:
 					print("강한 충돌 감지됨! 충돌 임펄스: ", impact_impulse_magnitude)
 				
-				if impact_impulse_magnitude >= 1500 and impact_impulse_magnitude < 3000:
+				if impact_impulse_magnitude >= 300 and impact_impulse_magnitude < 600:
 					apply_damage(1)
-				elif impact_impulse_magnitude >= 3000:
+				elif impact_impulse_magnitude >= 600:
 					apply_damage(2)
 
 func apply_damage(amount: int):

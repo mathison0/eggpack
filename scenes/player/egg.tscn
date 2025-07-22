@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://dk2qjfi0tvwlp" path="res://scripts/player/egg.gd" id="1_eb0g5"]
 [ext_resource type="PhysicsMaterial" uid="uid://cl76u2816118q" path="res://scenes/player/Ice Physics Material.tres" id="2_5w8ku"]
 [ext_resource type="PackedScene" uid="uid://q32jwck016x3" path="res://scenes/player/Jetpack_Left_Broken.tscn" id="2_58t0v"]
-[ext_resource type="Texture2D" uid="uid://cii47wtsuo8q1" path="res://assets/graphics/egg/egg_img.png" id="2_eb0g5"]
-[ext_resource type="Texture2D" uid="uid://cwoo5r88f5cqs" path="res://assets/graphics/jetpack/jetpack_left.png" id="3_eb0g5"]
+[ext_resource type="Texture2D" uid="uid://btr8oue7l3ydc" path="res://assets/graphics/egg/egg_img.png" id="2_eb0g5"]
+[ext_resource type="Texture2D" uid="uid://chrh6a6n4dy73" path="res://assets/graphics/jetpack/jetpack_left.png" id="3_eb0g5"]
 [ext_resource type="PackedScene" uid="uid://cjwnd6y3fgbn8" path="res://scenes/player/Jetpack_Right_Broken.tscn" id="3_k2d6k"]
-[ext_resource type="Texture2D" uid="uid://c1rww8piheekw" path="res://assets/graphics/jetpack/jetpack_right.png" id="4_5w8ku"]
+[ext_resource type="Texture2D" uid="uid://duuxs78i2y1oi" path="res://assets/graphics/jetpack/jetpack_right.png" id="4_5w8ku"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_eb0g5"]
 properties/0/path = NodePath(".:position")
@@ -26,9 +26,10 @@ height = 262.0
 [node name="Egg" type="RigidBody2D" groups=["Egg"]]
 z_index = 999
 collision_mask = 49
+mass = 0.2
 gravity_scale = 1.2
 center_of_mass_mode = 1
-center_of_mass = Vector2(0, 40)
+center_of_mass = Vector2(0, 8)
 contact_monitor = true
 max_contacts_reported = 8
 linear_damp = 0.3
@@ -42,6 +43,7 @@ ice_physics_material = ExtResource("2_5w8ku")
 replication_config = SubResource("SceneReplicationConfig_eb0g5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.2, 0.2)
 shape = SubResource("CapsuleShape2D_6upkn")
 one_way_collision_margin = 0.0
 
@@ -49,22 +51,22 @@ one_way_collision_margin = 0.0
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals"]
 texture = ExtResource("2_eb0g5")
-offset = Vector2(-4, 0)
+offset = Vector2(-0.8, 0)
 
 [node name="JetpackLeft" type="Node2D" parent="Visuals"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals/JetpackLeft"]
-position = Vector2(-150, 80)
+position = Vector2(-30, 16)
 texture = ExtResource("3_eb0g5")
 
 [node name="AnimationTimer" type="Timer" parent="Visuals/JetpackLeft"]
 wait_time = 0.1
 
 [node name="FuelBarLeft" type="ProgressBar" parent="Visuals/JetpackLeft"]
-offset_left = -300.0
-offset_top = -150.0
-offset_right = -250.0
-offset_bottom = 150.0
+offset_left = -60.0
+offset_top = -30.0
+offset_right = -50.0
+offset_bottom = 30.0
 fill_mode = 3
 show_percentage = false
 metadata/_edit_use_anchors_ = true
@@ -72,17 +74,17 @@ metadata/_edit_use_anchors_ = true
 [node name="JetpackRight" type="Node2D" parent="Visuals"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Visuals/JetpackRight"]
-position = Vector2(150, 80)
+position = Vector2(30, 16)
 texture = ExtResource("4_5w8ku")
 
 [node name="AnimationTimer" type="Timer" parent="Visuals/JetpackRight"]
 wait_time = 0.1
 
 [node name="FuelBarRight" type="ProgressBar" parent="Visuals/JetpackRight"]
-offset_left = 300.0
-offset_top = -150.0
-offset_right = 350.0
-offset_bottom = 150.0
+offset_left = 60.0
+offset_top = -30.0
+offset_right = 70.0
+offset_bottom = 30.0
 scale = Vector2(-1, 1)
 fill_mode = 3
 show_percentage = false
