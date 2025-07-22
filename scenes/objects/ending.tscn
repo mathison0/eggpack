@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://dvt5of1kblvrm"]
+
+[ext_resource type="Texture2D" uid="uid://yrh6n357xj7c" path="res://assets/graphics/ending_img.png" id="1_fabvv"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_drrvi"]
+size = Vector2(703, 41)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_fabvv"]
+a = Vector2(-389, 12)
+b = Vector2(313, 11)
+
+[node name="Ending" type="StaticBody2D"]
+z_index = 620
+collision_layer = 32
+collision_mask = 0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_fabvv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-317.5, -18.5)
+shape = SubResource("RectangleShape2D_drrvi")
+
+[node name="LandingZone" type="Area2D" parent="."]
+collision_layer = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LandingZone"]
+position = Vector2(-279, -60)
+shape = SubResource("SegmentShape2D_fabvv")

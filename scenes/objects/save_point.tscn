@@ -6,6 +6,8 @@
 size = Vector2(552, 99)
 
 [node name="SavePoint" type="StaticBody2D" groups=["save_points"]]
+collision_layer = 16
+collision_mask = 0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_yqx2y")
