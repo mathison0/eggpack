@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=9 format=3 uid="uid://d2840lcdgu7bo"]
+[gd_resource type="TileSet" load_steps=10 format=3 uid="uid://d2840lcdgu7bo"]
 
 [ext_resource type="PhysicsMaterial" uid="uid://dmsk0oiavtbef" path="res://scenes/objects/Bounce Physics Material.tres" id="1_aoaae"]
 [ext_resource type="Texture2D" uid="uid://dyphnfk1xvr3w" path="res://assets/graphics/tiles/ground_special_tileset.png" id="1_bh2xx"]
@@ -17,6 +17,9 @@ tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 65536, 0, 65537, 65536, 2,
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_02fhs"]
 tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 5, 1, 196608, 4, 65537, 196608, 5)
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aoaae"]
+friction = 0.6
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_aoaae"]
 texture = ExtResource("1_bh2xx")
@@ -450,6 +453,7 @@ texture_region_size = Vector2i(64, 64)
 [resource]
 tile_size = Vector2i(64, 64)
 physics_layer_0/collision_layer = 1
+physics_layer_0/physics_material = SubResource("PhysicsMaterial_aoaae")
 physics_layer_1/collision_layer = 1
 physics_layer_1/physics_material = ExtResource("1_aoaae")
 custom_data_layer_0/name = "tileType"
