@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsnpygrgnxyoo"]
+
+[ext_resource type="Script" uid="uid://bqhcd0ra8iht6" path="res://scripts/ui/status_effect_ui.gd" id="1_svb1f"]
+
+[node name="StatusEffectUi" type="MarginContainer"]
+script = ExtResource("1_svb1f")
+
+[node name="IconContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 10

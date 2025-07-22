@@ -203,18 +203,28 @@ func _physics_process(delta):
 		# 클라이언트(P2)의 입력은 RPC를 통해 수신한 `client_right_jetpack_active` 변수를 사용합니다.
 		var right_key_pressed = client_right_jetpack_active
 		
+		var left_jetpack_fire = false
+		var right_jetpack_fire = true
+		
+		if GameManager.is_control_swapped:
+			left_jetpack_fire = right_key_pressed
+			right_jetpack_fire = left_key_pressed
+		else:
+			left_jetpack_fire = left_key_pressed
+			right_jetpack_fire = right_key_pressed
+		
 		var total_torque_to_apply = 0.0
 		var any_jetpack_key_active = left_key_pressed or right_key_pressed
 		
 		# --- 연료 소모 및 힘/토크 적용 로직 ---
 		var can_use_left_jetpack = current_left_jetpack_fuel > 0
-		if left_key_pressed and can_use_left_jetpack:
+		if left_jetpack_fire and can_use_left_jetpack:
 			current_left_jetpack_fuel -= jetpack_fuel_consumption_rate * delta
 			total_torque_to_apply += jetpack_torque_amount
 			apply_jetpack_force()
 		
 		var can_use_right_jetpack = current_right_jetpack_fuel > 0
-		if right_key_pressed and can_use_right_jetpack:
+		if right_jetpack_fire and can_use_right_jetpack:
 			current_right_jetpack_fuel -= jetpack_fuel_consumption_rate * delta
 			total_torque_to_apply -= jetpack_torque_amount
 			apply_jetpack_force()
@@ -249,6 +259,7 @@ func _physics_process(delta):
 		var tile_data = tileMap.get_cell_tile_data(tileMap.local_to_map(tileMap.to_local(global_position)))
 		
 		max_linear_speed = max_max_linear_speed
+		var cloud_slow_down = false
 		if tile_data:
 			if tile_data.get_custom_data("tileType") == "wind":
 				var force = tile_data.get_custom_data("wind_power")
@@ -258,12 +269,18 @@ func _physics_process(delta):
 			if tile_data.get_custom_data("tileType") == "cloud":
 				var max_speed = tile_data.get_custom_data("max_speed")
 				max_linear_speed = max_speed
+				cloud_slow_down = true
+		
+		if cloud_slow_down:
+			GameManager.cloud_slow_down(true)
+		else:
+			GameManager.cloud_slow_down(false)
 				
 		
 		# --- 상태 동기화 ---
 		# 호스트에서 계산된 상태(연료, 제트팩 작동여부)를 모든 클라이언트에게 전송합니다.
 		# 또한 호스트 자신의 화면에도 즉시 반영합니다.
-		update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_key_pressed and can_use_left_jetpack, right_key_pressed and can_use_right_jetpack)
+		update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_jetpack_fire and can_use_left_jetpack, right_jetpack_fire and can_use_right_jetpack)
 
 		visuals.global_position = global_position
 		visuals.global_rotation = global_rotation

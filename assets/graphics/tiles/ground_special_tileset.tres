@@ -1,7 +1,22 @@
-[gd_resource type="TileSet" load_steps=4 format=3 uid="uid://d2840lcdgu7bo"]
+[gd_resource type="TileSet" load_steps=9 format=3 uid="uid://d2840lcdgu7bo"]
 
 [ext_resource type="PhysicsMaterial" uid="uid://dmsk0oiavtbef" path="res://scenes/objects/Bounce Physics Material.tres" id="1_aoaae"]
 [ext_resource type="Texture2D" uid="uid://dyphnfk1xvr3w" path="res://assets/graphics/tiles/ground_special_tileset.png" id="1_bh2xx"]
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_aoaae"]
+tile_data = PackedInt32Array(0, 0, 0, 1, 65536, 0, 2, 65536, 0)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_8468c"]
+tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 131072, 0, 65537, 131072, 2)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_lbo6e"]
+tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 65536, 0, 65537, 65536, 2, 2, 131072, 0, 65538, 131072, 2)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_tspdw"]
+tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 65536, 0, 65537, 65536, 2, 2, 65536, 0, 65538, 65536, 2, 3, 131072, 0, 65539, 131072, 2)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_02fhs"]
+tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 5, 1, 196608, 4, 65537, 196608, 5)
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_aoaae"]
 texture = ExtResource("1_bh2xx")
@@ -186,12 +201,16 @@ texture_region_size = Vector2i(320, 320)
 5:5/0/custom_data_0 = "ice"
 5:2/0 = 0
 5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+5:2/0/custom_data_0 = "spike"
 5:3/0 = 0
 5:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+5:3/0/custom_data_0 = "spike"
 11:2/0 = 0
 11:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+11:2/0/custom_data_0 = "soft"
 11:3/0 = 0
 11:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+11:3/0/custom_data_0 = "soft"
 11:7/0 = 0
 11:7/0/physics_layer_1/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
 11:7/0/custom_data_0 = "soft"
@@ -387,6 +406,40 @@ texture_region_size = Vector2i(320, 320)
 21:6/0 = 0
 21:6/0/custom_data_0 = "cloud"
 21:6/0/custom_data_4 = 500.0
+6:2/0 = 0
+6:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+6:2/0/custom_data_0 = "spike"
+6:3/0 = 0
+6:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+6:3/0/custom_data_0 = "spike"
+7:3/0 = 0
+7:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+7:3/0/custom_data_0 = "spike"
+7:2/0 = 0
+7:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+7:2/0/custom_data_0 = "spike"
+8:2/0 = 0
+8:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+8:2/0/custom_data_0 = "spike"
+8:3/0 = 0
+8:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-160, -160, 160, -160, 160, 160, -160, 160)
+8:3/0/custom_data_0 = "spike"
+12:2/0 = 0
+12:2/0/custom_data_0 = "soft"
+12:3/0 = 0
+12:3/0/custom_data_0 = "soft"
+13:3/0 = 0
+13:3/0/custom_data_0 = "soft"
+13:2/0 = 0
+13:2/0/custom_data_0 = "soft"
+14:2/0 = 0
+14:2/0/custom_data_0 = "soft"
+14:3/0 = 0
+14:3/0/custom_data_0 = "soft"
+0:6/0 = 0
+0:7/0 = 0
+1:7/0 = 0
+1:6/0 = 0
 
 [resource]
 tile_size = Vector2i(320, 320)
@@ -404,3 +457,8 @@ custom_data_layer_3/type = 5
 custom_data_layer_4/name = "max_speed"
 custom_data_layer_4/type = 3
 sources/0 = SubResource("TileSetAtlasSource_aoaae")
+pattern_0 = SubResource("TileMapPattern_aoaae")
+pattern_1 = SubResource("TileMapPattern_8468c")
+pattern_2 = SubResource("TileMapPattern_lbo6e")
+pattern_3 = SubResource("TileMapPattern_tspdw")
+pattern_4 = SubResource("TileMapPattern_02fhs")
