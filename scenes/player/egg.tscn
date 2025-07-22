@@ -27,7 +27,7 @@ height = 262.0
 z_index = 999
 collision_mask = 49
 mass = 0.2
-gravity_scale = 1.2
+gravity_scale = 0.8
 center_of_mass_mode = 1
 center_of_mass = Vector2(0, 8)
 contact_monitor = true
@@ -35,6 +35,11 @@ max_contacts_reported = 8
 linear_damp = 0.3
 angular_damp = 0.1
 script = ExtResource("1_eb0g5")
+jetpack_thrust_vertical = 250.0
+jetpack_torque_amount = 250.0
+max_linear_speed = 10000.0
+max_angular_speed = 500.0
+max_max_linear_speed = 10000.0
 jetpack_left_broken_scene = ExtResource("2_58t0v")
 jetpack_right_broken_scene = ExtResource("3_k2d6k")
 ice_physics_material = ExtResource("2_5w8ku")
@@ -90,4 +95,3 @@ fill_mode = 3
 show_percentage = false
 
 [node name="Camera2D" type="Camera2D" parent="Visuals"]
-zoom = Vector2(0.2, 0.2)
