@@ -1,6 +1,6 @@
 [gd_scene load_steps=19 format=3 uid="uid://drncxglbgtyi8"]
 
-[ext_resource type="Script" path="res://scripts/objects/swap_portal.gd" id="1_0vg43"]
+[ext_resource type="Script" uid="uid://00xj7yrftyx4" path="res://scripts/objects/swap_portal.gd" id="1_0vg43"]
 [ext_resource type="Texture2D" uid="uid://dc04ytnirae7w" path="res://assets/graphics/objects/SwapPortal.png" id="1_pc8e0"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0vg43"]

@@ -15,6 +15,7 @@ func _ready():
 func _setup_status_icons():
 	STATUS_ICONS[GameManager.Status.CONTROL_SWAPPED] = _match_atlas(0, 0)
 	STATUS_ICONS[GameManager.Status.SLOWED_DOWN] = _match_atlas(1, 0)
+	STATUS_ICONS[GameManager.Status.JAMMED] = _match_atlas(2, 0)
 
 func _match_atlas(x: int, y: int) -> AtlasTexture:
 	var icon_atlas = AtlasTexture.new()

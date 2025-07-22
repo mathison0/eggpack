@@ -43,6 +43,9 @@ ice_physics_material = ExtResource("2_5w8ku")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_eb0g5")
 
+[node name="JammingTimer" type="Timer" parent="."]
+one_shot = true
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 scale = Vector2(0.2, 0.2)
 shape = SubResource("CapsuleShape2D_6upkn")

@@ -8,7 +8,8 @@ var lobby_code: String = ""
 var is_control_swapped: bool = false
 enum Status {
 	CONTROL_SWAPPED,
-	SLOWED_DOWN
+	SLOWED_DOWN,
+	JAMMED
 }
 var active_status: Array[Status] = []
 
@@ -50,6 +51,13 @@ func cloud_slow_down(state_bool: bool):
 		add_status(Status.SLOWED_DOWN)
 	else:
 		remove_status(Status.SLOWED_DOWN)
+
+# 먹구름 재밍
+func dark_cloud_jam():
+	if not GameManager.is_host():
+		return
+	
+	
 
 @rpc("any_peer", "reliable")
 func sync_status_update(changed_status: Array[Status]):

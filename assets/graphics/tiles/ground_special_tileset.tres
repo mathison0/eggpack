@@ -1,4 +1,4 @@
-[gd_resource type="TileSet" load_steps=10 format=3 uid="uid://d2840lcdgu7bo"]
+[gd_resource type="TileSet" load_steps=12 format=3 uid="uid://d2840lcdgu7bo"]
 
 [ext_resource type="PhysicsMaterial" uid="uid://dmsk0oiavtbef" path="res://scenes/objects/Bounce Physics Material.tres" id="1_aoaae"]
 [ext_resource type="Texture2D" uid="uid://dyphnfk1xvr3w" path="res://assets/graphics/tiles/ground_special_tileset.png" id="1_bh2xx"]
@@ -17,6 +17,12 @@ tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 2, 1, 65536, 0, 65537, 65536, 2,
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_02fhs"]
 tile_data = PackedInt32Array(0, 131072, 4, 65536, 131072, 5, 1, 196608, 4, 65537, 196608, 5)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_u177l"]
+tile_data = PackedInt32Array(0, 1310720, 5, 65536, 1310720, 7, 1, 1376256, 5, 65537, 1376256, 7, 2, 1376256, 5, 65538, 1376256, 7, 3, 1441792, 5, 65539, 1441792, 7)
+
+[sub_resource type="TileMapPattern" id="TileMapPattern_i7nnr"]
+tile_data = PackedInt32Array(0, 1310720, 5, 65536, 1310720, 7, 1, 1376256, 5, 65537, 1376256, 7, 2, 1441792, 5, 65538, 1441792, 7)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aoaae"]
 friction = 0.35
@@ -449,6 +455,26 @@ texture_region_size = Vector2i(64, 64)
 0:7/0 = 0
 1:7/0 = 0
 1:6/0 = 0
+24:5/0 = 0
+24:5/0/custom_data_0 = "dark_cloud"
+25:5/0 = 0
+25:5/0/custom_data_0 = "dark_cloud"
+26:5/0 = 0
+26:5/0/custom_data_0 = "dark_cloud"
+27:5/0 = 0
+27:5/0/custom_data_0 = "dark_cloud"
+27:6/0 = 0
+27:6/0/custom_data_0 = "dark_cloud"
+26:6/0 = 0
+26:6/0/custom_data_0 = "dark_cloud"
+25:6/0 = 0
+25:6/0/custom_data_0 = "dark_cloud"
+25:7/0 = 0
+25:7/0/custom_data_0 = "dark_cloud"
+26:7/0 = 0
+26:7/0/custom_data_0 = "dark_cloud"
+27:7/0 = 0
+27:7/0/custom_data_0 = "dark_cloud"
 
 [resource]
 tile_size = Vector2i(64, 64)
@@ -472,3 +498,5 @@ pattern_1 = SubResource("TileMapPattern_8468c")
 pattern_2 = SubResource("TileMapPattern_lbo6e")
 pattern_3 = SubResource("TileMapPattern_tspdw")
 pattern_4 = SubResource("TileMapPattern_02fhs")
+pattern_5 = SubResource("TileMapPattern_u177l")
+pattern_6 = SubResource("TileMapPattern_i7nnr")

@@ -21,7 +21,7 @@ var jetpack_thrust_vertical
 # 세이브 포인트 및 리스폰 변수
 # ================================================================
 var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위치
-@export var default_spawn_pos: Vector2 = Vector2(0, 0) # 초기 스폰 위치 (세이브 포인트 없을 경우)
+@export var default_spawn_pos: Vector2 = Vector2(200, 5000) # 초기 스폰 위치 (세이브 포인트 없을 경우)
 @export var respawn_delay: float = 3.0 # 리스폰까지 대기 시간 (계란이 깨진 후)
 @export var respawn_y_offset: float = -20.0
 @export var respawn_invincible_duration: float = 0.5 # 리스폰 후 무적 시간
@@ -88,6 +88,8 @@ var current_right_jetpack_fuel: float
 
 @onready var jetpack_left_visuals_node = $Visuals/JetpackLeft
 @onready var jetpack_right_visuals_node = $Visuals/JetpackRight
+
+@onready var jamming_timer = $JammingTimer
 
 @export var interpolation_speed = 15.0
 
@@ -157,6 +159,8 @@ func _ready():
 	body_entered.connect(_on_any_body_entered)
 	body_exited.connect(_on_body_exited)
 	
+	jamming_timer.timeout.connect(_on_jamming_timer_timeout)
+	
 	# 목숨 초기화 및 초기 달걀 스프라이트 설정
 	current_lives = max_lives
 	egg_main_sprite.texture = egg_texture # 초기 달걀은 온전한 상태
@@ -221,8 +225,8 @@ func _physics_process(delta):
 		# --- 연료 소모 및 힘/토크 적용 로직 ---
 		var can_use_left_jetpack = current_left_jetpack_fuel > 0
 		var can_use_right_jetpack = current_right_jetpack_fuel > 0
-		var is_left_on = left_jetpack_fire and can_use_left_jetpack
-		var is_right_on = right_jetpack_fire and can_use_right_jetpack
+		var is_left_on = left_jetpack_fire and can_use_left_jetpack and jamming_timer.time_left == 0
+		var is_right_on = right_jetpack_fire and can_use_right_jetpack and jamming_timer.time_left == 0
 		
 		if is_left_on and is_right_on:
 			jetpack_thrust_vertical =  max_both_jetpack_speed
@@ -279,6 +283,11 @@ func _physics_process(delta):
 				var max_speed = tile_data.get_custom_data("max_speed")
 				max_linear_speed = max_speed
 				cloud_slow_down = true
+			
+			if tile_data.get_custom_data("tileType") == "dark_cloud":
+				jamming_timer.start(3)
+				GameManager.add_status(GameManager.Status.JAMMED)
+				Timer
 		
 		if cloud_slow_down:
 			GameManager.cloud_slow_down(true)
@@ -289,7 +298,7 @@ func _physics_process(delta):
 		# --- 상태 동기화 ---
 		# 호스트에서 계산된 상태(연료, 제트팩 작동여부)를 모든 클라이언트에게 전송합니다.
 		# 또한 호스트 자신의 화면에도 즉시 반영합니다.
-		update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_jetpack_fire and can_use_left_jetpack, right_jetpack_fire and can_use_right_jetpack)
+		update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, is_left_on, is_right_on)
 
 		visuals.global_position = global_position
 		visuals.global_rotation = global_rotation
@@ -456,6 +465,7 @@ func update_visuals_and_broadcast(left_fuel: float, right_fuel: float, left_on: 
 func apply_jetpack_force():
 	# apply_central_force는 질량 중심에 힘을 가하여 토크를 발생시키지 않습니다.
 	# 힘의 방향은 달걀의 로컬 '위' 방향(-transform.y)입니다.
+	
 	apply_central_force(-transform.y * jetpack_thrust_vertical)
 
 # 제트팩 스프라이트와 애니메이션 타이머를 업데이트하는 함수
@@ -712,3 +722,7 @@ func refill_fuel():
 	var can_use_right_jetpack = current_right_jetpack_fuel > 0
 	
 	update_visuals_and_broadcast(current_left_jetpack_fuel, current_right_jetpack_fuel, left_key_pressed and can_use_left_jetpack, right_key_pressed and can_use_right_jetpack)
+
+# 재밍
+func _on_jamming_timer_timeout():
+	GameManager.remove_status(GameManager.Status.JAMMED)
