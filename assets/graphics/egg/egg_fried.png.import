@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c1okqvueq13a2"
-path="res://.godot/imported/save_point_img.png-8909614d164b5163711bedca7b236776.ctex"
+uid="uid://cod525l0cxhfe"
+path="res://.godot/imported/egg_fried.png-c795a3692709c9cfe26b5321e5c1b8de.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/graphics/save_point_img.png"
-dest_files=["res://.godot/imported/save_point_img.png-8909614d164b5163711bedca7b236776.ctex"]
+source_file="res://assets/graphics/egg/egg_fried.png"
+dest_files=["res://.godot/imported/egg_fried.png-c795a3692709c9cfe26b5321e5c1b8de.ctex"]
 
 [params]
 

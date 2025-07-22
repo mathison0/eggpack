@@ -13,7 +13,7 @@ extends RigidBody2D
 @export var max_angular_speed = 3000.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 1000000.0
 # 충돌 판정 관련 변수
-@export var impact_damage_threshold_speed: float = 1200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
+@export var impact_damage_threshold_speed: float = 1500.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ================================================================
 # 세이브 포인트 및 리스폰 변수
@@ -22,6 +22,7 @@ var last_save_point_pos: Vector2 = Vector2.ZERO # 최신 세이브 포인트 위
 @export var default_spawn_pos: Vector2 = Vector2(0, 0) # 초기 스폰 위치 (세이브 포인트 없을 경우)
 @export var respawn_delay: float = 3.0 # 리스폰까지 대기 시간 (계란이 깨진 후)
 @export var respawn_y_offset: float = -400.0
+@export var respawn_invincible_duration: float = 0.5 # 리스폰 후 무적 시간
 
 # ================================================================
 # 목숨 시스템 변수
@@ -39,6 +40,7 @@ signal lives_changed(new_lives)
 @export var egg_texture: Texture2D = preload("res://assets/graphics/egg/egg_img.png") # 온전한 달걀 이미지 경로
 @export var egg_cracked_texture: Texture2D = preload("res://assets/graphics/egg/egg_cracked_img.png") # 금이 간 달걀 이미지 경로
 @export var egg_broken_texture: Texture2D = preload("res://assets/graphics/egg/egg_broken_img.png") # 깨진 달걀 이미지 경로
+@export var egg_fried_texture: Texture2D = preload("res://assets/graphics/egg/egg_fried.png")# 계란후라이 스프라이트 텍스처
 
 # ================================================================
 # 연료 시스템 변수
@@ -110,6 +112,10 @@ var client_right_jetpack_active = false
 # 클라이언트(P2)가 자신의 이전 입력 상태를 기억하여, 상태가 바뀔 때만 RPC를 보내도록 하기 위한 변수
 var _client_previous_input_state = false
 
+# ================================================================
+# Collision Layer Indices (프로젝트 설정에 따라 숫자가 다를 수 있음)
+const LAYER_SAVEPOINTS_NODAMAGE = 1 << 4 # LAYER 5
+const LAYER_ENDING_LANDING_ZONE = 1 << 5 # LAYER 6
 
 # ================================================================
 # 초기 설정 함수
@@ -146,7 +152,7 @@ func _ready():
 	
 	# 충돌 감지 신호 연결
 	# RigidBody2D의 Contact Monitor를 true로, Contacts Reported를 1 이상으로 설정해야 합니다.
-	body_entered.connect(_on_body_entered)
+	body_entered.connect(_on_any_body_entered)
 	body_exited.connect(_on_body_exited)
 	
 	# 목숨 초기화 및 초기 달걀 스프라이트 설정
@@ -156,8 +162,12 @@ func _ready():
 	
 	add_to_group("Egg")	
 	
-	# 계란판과의 충돌 감지 신호 연결
-	body_entered.connect(_on_body_entered_egg_carton) # 새로운 함수 연결
+	## 계란판과의 충돌 감지 신호 연결
+	#body_entered.connect(_on_body_entered_egg_carton) # 새로운 함수 연결
+	#
+	## area2D (엔딩 착륙 지점)와의 충돌 감지 신호 연결
+	## RigidBody2D가 Area2D에 들어갔을 때도 'body_entered' 시그널이 발생합니다.
+	#body_entered.connect(_on_body_entered_area) # <--- 새로운 시그널 연결!
 	
 	# 디버깅을 위해 현재 권한과 피어 ID를 출력합니다.
 	print("Egg node's multiplayer_authority: ", get_multiplayer_authority())
@@ -319,7 +329,7 @@ func sync_lives(lives: int):
 # RPC - 세이브 포인트 동기화 및 시각 효과 업데이트
 # ===============================
 @rpc("any_peer", "reliable")
-func update_save_point_rpc(pos: Vector2, active_node_path: NodePath):
+func update_save_point_rpc(pos: Vector2):
 	# 모든 피어에서 세이브 포인트 위치를 업데이트합니다.
 	last_save_point_pos = pos
 	print("Save point updated to: ", last_save_point_pos, " on peer ", multiplayer.get_unique_id())
@@ -351,6 +361,20 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 	# --- 리스폰 로직 (모든 피어에서 실행) ---
 	respawn_egg_local()
 	
+# ================================================================
+#  RPC - 계란후라이 스프라이트 동기화
+# ================================================================
+@rpc("any_peer", "reliable", "call_local")
+func change_to_egg_fried_sprite():
+	# 모든 피어에서 달걀 스프라이트를 계란후라이로 변경
+	if egg_fried_texture:
+		egg_main_sprite.texture = egg_fried_texture
+		jetpack_left_visuals_node.visible = false
+		jetpack_right_visuals_node.visible = false
+		print("Egg sprite changed to Fried Egg on peer ", multiplayer.get_unique_id())
+	else:
+		print("Fried Egg Texture is not assigned!")
+	
 # ===============================
 # 리스폰 로직
 # ===============================
@@ -378,6 +402,7 @@ func respawn_egg_local():
 	
 	set_physics_process(true)
 	
+	await get_tree().create_timer(respawn_invincible_duration).timeout
 	isInvincible = false
 	
 # ================================================================
@@ -494,33 +519,44 @@ func _on_left_jetpack_timer_timeout():
 func _on_right_jetpack_timer_timeout():
 	right_jetpack_anim_state = not right_jetpack_anim_state
 
-# 바닥 충돌 감지
-func _on_body_entered(body: Node2D):
+# 모든 body_entered 시그널을 처리할 범용 함수
+func _on_any_body_entered(body: Node2D):
+	# 일반 바닥 충돌 감지
 	if body.is_in_group("Ground"):
 		is_on_ground = true
+
+	# 계란판(세이브 포인트) 충돌 감지
+	# `Area2D`인 계란판이 "save_points" 그룹에 있고, 현재 달걀이 호스트의 권한을 가질 때
+	if body.is_in_group("save_points") and get_multiplayer_authority() == multiplayer.get_unique_id():
+		# StaticBody2D인지 확인하는 조건은 Area2D 그룹화 시에는 필요 없음 (단, 계란판이 StaticBody2D 라면 유지)
+		var entered_carton = body
+		var new_save_pos = entered_carton.global_position
+
+		if last_save_point_pos != new_save_pos:
+			print("Host Egg reached new save point: ", new_save_pos)
+			last_save_point_pos = new_save_pos
+			update_save_point_rpc.rpc(last_save_point_pos)
+
+	# 엔딩 착륙 지점(Area2D)과의 충돌 감지
+	# `Area2D` 타입이면서 EndingLandingZone 레이어에 속하고, 현재 달걀이 호스트의 권한을 가질 때
+	# Note: `body`는 Area2D일 수도, PhysicsBody2D일 수도 있음. Area2D를 기대한다면 `body is Area2D` 확인.
+	#if body is Area2D:
+		#print("Area2D")
+	#if body is StaticBody2D:
+		#print("StaticBody")
+	if body is StaticBody2D and (body.collision_layer & LAYER_ENDING_LANDING_ZONE) and get_multiplayer_authority() == multiplayer.get_unique_id():
+		print("Egg entered the Ending Landing Zone!")
+		change_to_egg_fried_sprite.rpc()
+		set_physics_process(false)
+		linear_velocity = Vector2.ZERO
+		angular_velocity = 0.0
+		rotation = 0.0
+
 
 func _on_body_exited(body: Node2D):
 	if body.is_in_group("Ground"):
 		is_on_ground = false
 		
-# 계란판(세이브 포인트) 충돌 감지
-func _on_body_entered_egg_carton(body: Node2D):
-	if body.is_in_group("save_points"): # 충돌한 body가 EggCarton인지 확인
-		# 충돌한 바디가 현재 피어의 권한을 가진 달걀인지 확인 (즉, 호스트의 달걀)
-		if get_multiplayer_authority() == multiplayer.get_unique_id():
-			var entered_carton = body # body는 Area2D(EggCarton) 노드 자체입니다.
-
-			# 새 세이브 포인트의 global_position
-			var new_save_pos = entered_carton.global_position
-
-			# 이미 같은 세이브 포인트에 도달했다면 업데이트하지 않음
-			if last_save_point_pos != new_save_pos:
-				print("Host Egg reached new save point: ", new_save_pos)
-				last_save_point_pos = new_save_pos
-
-				# 모든 피어에 세이브 포인트 위치만 동기화
-				update_save_point_rpc.rpc(last_save_point_pos) # active_node_path 인자 제거
-
 
 # 강한 충돌 감지 (물리 엔진 콜백, 호스트에서만 실행됨)
 func _integrate_forces(state: PhysicsDirectBodyState2D):
@@ -577,7 +613,15 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				continue
 			elif tile_type == "jump_pad":
 				continue
-			
+				
+				
+			# --- 충돌한 객체가 계란판(SavePoints_NoDamage) 레이어에 있는지 확인 ---
+			# 만약 충돌한 객체가 SavePoints_NoDamage 레이어에 있다면, 데미지 계산을 건너_integrate_forces니다.
+			if collider is not TileMapLayer:	
+				if collider and ((collider.collision_layer & LAYER_SAVEPOINTS_NODAMAGE) or (collider.collision_layer & LAYER_ENDING_LANDING_ZONE)):
+					#print("Collided with a SavePoint_NoDamage (EggCarton). No damage applied.")
+					continue # 다음 충돌 지점으로 넘어감 (이 충돌에 대해서는 데미지 계산 건너뛰기)
+
 			var impulse = state.get_contact_impulse(i)
 			var impact_impulse_magnitude = impulse.length()
 			
@@ -623,7 +667,7 @@ func apply_damage(amount: int):
 		# 잠시 후 노드 제거 (애니메이션 등 보여줄 시간 확보)
 		#await get_tree().create_timer(3.0).timeout # 3초 대기 후 제거
 		#queue_free() # 달걀 노드 제거
-		# 여기에 게임 오버 화면 전환, 재시작 로직 등을 추가할 수 있습니다.
+		
 
 # 연료 채우기 오브젝트 
 func refill_fuel():
