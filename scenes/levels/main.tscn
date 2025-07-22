@@ -10,8 +10,8 @@ position = Vector2(258, -527)
 rotation = 0.0080111
 gravity_scale = 8.0
 linear_damp = 0.0
-jetpack_thrust_vertical = 180.0
-max_linear_speed = 200.0
+jetpack_thrust_vertical = 200.0
+max_linear_speed = 50.0
 max_angular_speed = 200.0
 
 [node name="platformTileMap" parent="." instance=ExtResource("2_2vj2h")]

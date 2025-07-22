@@ -5,13 +5,15 @@ extends RigidBody2D
 # 플레이어 설정 변수들
 # ================================================================
 # 제트팩 분사 시 상승하는 힘
-@export var jetpack_thrust_vertical = 200.0
+var jetpack_thrust_vertical
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
 @export var jetpack_torque_amount = 200.0
 # 최대 속도 제한
 @export var max_linear_speed = 50.0 # 최대 선형(직선) 속도
 @export var max_angular_speed = 200.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 10000.0
+@export var max_both_jetpack_speed = 150
+@export var max_sole_jetpack_speed = 200
 # 충돌 판정 관련 변수
 @export var impact_damage_threshold_speed: float = 200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
@@ -218,13 +220,20 @@ func _physics_process(delta):
 		
 		# --- 연료 소모 및 힘/토크 적용 로직 ---
 		var can_use_left_jetpack = current_left_jetpack_fuel > 0
-		if left_jetpack_fire and can_use_left_jetpack:
+		var can_use_right_jetpack = current_right_jetpack_fuel > 0
+		var is_left_on = left_jetpack_fire and can_use_left_jetpack
+		var is_right_on = right_jetpack_fire and can_use_right_jetpack
+		
+		if is_left_on and is_right_on:
+			jetpack_thrust_vertical =  max_both_jetpack_speed
+		else:
+			jetpack_thrust_vertical = max_sole_jetpack_speed
+		if is_left_on:
 			current_left_jetpack_fuel -= jetpack_fuel_consumption_rate * delta
 			total_torque_to_apply += jetpack_torque_amount
 			apply_jetpack_force()
 		
-		var can_use_right_jetpack = current_right_jetpack_fuel > 0
-		if right_jetpack_fire and can_use_right_jetpack:
+		if is_right_on:
 			current_right_jetpack_fuel -= jetpack_fuel_consumption_rate * delta
 			total_torque_to_apply -= jetpack_torque_amount
 			apply_jetpack_force()
