@@ -10,12 +10,12 @@ var jetpack_thrust_vertical
 @export var jetpack_torque_amount = 200.0
 # 최대 속도 제한
 @export var max_linear_speed = 50.0 # 최대 선형(직선) 속도
-@export var max_angular_speed = 200.0 # 최대 각속도 (회전 속도)
+@export var max_angular_speed = 100.0 # 최대 각속도 (회전 속도)
 @export var max_max_linear_speed = 10000.0
 @export var max_both_jetpack_speed = 100
 @export var max_sole_jetpack_speed = 150
 # 충돌 판정 관련 변수
-@export var impact_damage_threshold_speed: float = 200.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
+@export var impact_damage_threshold_speed: float = 150.0 # 이 속도 이상으로 충돌 시 강한 충돌로 간주
 
 # ================================================================
 # 세이브 포인트 및 리스폰 변수
@@ -655,9 +655,9 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				if impact_impulse_magnitude > impact_damage_threshold_speed:
 					print("강한 충돌 감지됨! 충돌 임펄스: ", impact_impulse_magnitude)
 				
-				if impact_impulse_magnitude >= 200 and impact_impulse_magnitude < 400:
+				if impact_impulse_magnitude >= 150 and impact_impulse_magnitude < 250:
 					apply_damage(1)
-				elif impact_impulse_magnitude >= 400:
+				elif impact_impulse_magnitude >= 250:
 					apply_damage(2)
 
 func apply_damage(amount: int):
