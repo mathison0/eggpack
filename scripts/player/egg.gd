@@ -841,7 +841,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 			var tile_type = ""
 			var tile_data
 			if collider is TileMapLayer:
-				var contact_pos_in_px = state.get_contact_collider_position(i)
+				var contact_pos_in_px = state.get_contact_local_position(i)
 				var map_coordinates = collider.local_to_map(contact_pos_in_px)
 				tile_data = collider.get_cell_tile_data(map_coordinates)
 				if tile_data and tile_data.has_custom_data("tileType"):
@@ -849,7 +849,6 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 			
 			if dealt_damage_this_frame:
 				continue
-			
 			# spike 타일의 경우 닿자마자 데미지 (충돌 무관)
 			if tile_type == "spike":
 				apply_damage(2)
@@ -863,7 +862,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 			elif tile_type == "ice":
 				is_on_ice = true
 				
-			if can_use_jump_pad and tile_type == "jump_pad":
+			if can_use_jump_pad and tile_type == "jump_pad" and not isInvincible:
 				var direction = tile_data.get_custom_data("launch_direction")
 				var power = tile_data.get_custom_data("launch_power")
 				
