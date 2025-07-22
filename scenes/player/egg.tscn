@@ -1,12 +1,15 @@
-[gd_scene load_steps=10 format=3 uid="uid://h17puraebncd"]
+[gd_scene load_steps=13 format=3 uid="uid://h17puraebncd"]
 
 [ext_resource type="Script" uid="uid://dk2qjfi0tvwlp" path="res://scripts/player/egg.gd" id="1_eb0g5"]
 [ext_resource type="PhysicsMaterial" uid="uid://cl76u2816118q" path="res://scenes/player/Ice Physics Material.tres" id="2_5w8ku"]
 [ext_resource type="PackedScene" uid="uid://q32jwck016x3" path="res://scenes/player/Jetpack_Left_Broken.tscn" id="2_58t0v"]
 [ext_resource type="Texture2D" uid="uid://btr8oue7l3ydc" path="res://assets/graphics/egg/egg_img.png" id="2_eb0g5"]
+[ext_resource type="Texture2D" uid="uid://dm4g812gc67g7" path="res://assets/graphics/egg/egg_broken.png" id="2_lo5bx"]
 [ext_resource type="Texture2D" uid="uid://chrh6a6n4dy73" path="res://assets/graphics/jetpack/jetpack_left.png" id="3_eb0g5"]
 [ext_resource type="PackedScene" uid="uid://cjwnd6y3fgbn8" path="res://scenes/player/Jetpack_Right_Broken.tscn" id="3_k2d6k"]
+[ext_resource type="PackedScene" uid="uid://ro4w1ex448tq" path="res://scenes/player/EggShell_left.tscn" id="3_nrcqi"]
 [ext_resource type="Texture2D" uid="uid://duuxs78i2y1oi" path="res://assets/graphics/jetpack/jetpack_right.png" id="4_5w8ku"]
+[ext_resource type="PackedScene" uid="uid://baf70igu7riqr" path="res://scenes/player/EggShell_Right.tscn" id="4_803xk"]
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_eb0g5"]
 properties/0/path = NodePath(".:position")
@@ -36,6 +39,9 @@ linear_damp = 0.3
 angular_damp = 0.1
 script = ExtResource("1_eb0g5")
 jetpack_torque_amount = 250.0
+egg_broken_texture = ExtResource("2_lo5bx")
+egg_shell_left_scene = ExtResource("3_nrcqi")
+egg_shell_right_scene = ExtResource("4_803xk")
 jetpack_left_broken_scene = ExtResource("2_58t0v")
 jetpack_right_broken_scene = ExtResource("3_k2d6k")
 ice_physics_material = ExtResource("2_5w8ku")

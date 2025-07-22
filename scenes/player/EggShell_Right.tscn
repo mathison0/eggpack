@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://baf70igu7riqr"]
+
+[ext_resource type="Texture2D" uid="uid://d2qrsg7gn4pba" path="res://assets/graphics/egg/egg_shell_right.png" id="1_spit8"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ubpnp"]
+radius = 14.8649
+height = 35.4819
+
+[node name="EggShellRight" type="RigidBody2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_spit8")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2, -2)
+rotation = -0.820305
+shape = SubResource("CapsuleShape2D_ubpnp")
