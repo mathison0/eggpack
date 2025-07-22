@@ -37,6 +37,15 @@ var isInvincible: bool = false
 signal lives_changed(new_lives)
 
 # ================================================================
+# 높이 시스템 변수
+# ================================================================
+var current_height: float = 0.0 # 현재 달걀의 높이 (Y 좌표)
+var max_height: float = 0.0     # 기록된 최고 높이
+@onready var hud = get_tree().get_root().find_child("HUD", true, false) # HUD CanvasLayer 노드 참조
+@onready var current_height_label = hud.find_child("CurrentHeightLabel", true, false) # 현재 높이 Label 참조
+@onready var max_height_label = hud.find_child("MaxHeightLabel", true, false)       # 최고 높이 Label 참조
+
+# ================================================================
 # 달걀 스프라이트 리소스 
 # ================================================================
 @export var egg_texture: Texture2D = preload("res://assets/graphics/egg/egg_img.png") # 온전한 달걀 이미지 경로
@@ -284,6 +293,18 @@ func _physics_process(delta):
 			GameManager.cloud_slow_down(true)
 		else:
 			GameManager.cloud_slow_down(false)
+			
+		# --- 높이 업데이트 로직 (호스트에서만 계산) ---
+		current_height = -global_position.y # Y값이 작을수록 높이가 높다고 가정
+		# `global_position.y`가 음수일수록 (위로 갈수록) `current_height`는 양수로서 커집니다.
+		# 만약 맵의 바닥이 Y=0이라면, `current_height = -global_position.y`로 계산하면
+		# 지상으로부터의 높이로 생각할 수 있습니다. 필요에 따라 기준점을 추가할 수 있습니다.
+
+		if current_height > max_height:
+			max_height = current_height
+
+		# UI 업데이트 (모든 클라이언트에게 동기화)
+		update_height_ui_rpc.rpc(current_height, max_height)
 				
 		
 		# --- 상태 동기화 ---
@@ -352,7 +373,7 @@ func sync_lives(lives: int):
 	lives_changed.emit(current_lives)
 	
 # ===============================
-# RPC - 세이브 포인트 동기화 및 시각 효과 업데이트
+# RPC - 세이브 포인트 동기화
 # ===============================
 @rpc("any_peer", "reliable")
 func update_save_point_rpc(pos: Vector2):
@@ -400,6 +421,17 @@ func change_to_egg_fried_sprite():
 		print("Egg sprite changed to Fried Egg on peer ", multiplayer.get_unique_id())
 	else:
 		print("Fried Egg Texture is not assigned!")
+		
+# ===============================
+# RPC - 높이 UI 동기화
+# ===============================
+@rpc("any_peer", "reliable", "call_local")
+func update_height_ui_rpc(current_h: float, max_h: float):
+	# 모든 피어에서 UI 업데이트
+	if current_height_label: # 노드가 있는지 안전하게 확인
+		current_height_label.text = "현재 높이: %d m" % int(current_h)
+	if max_height_label: # 노드가 있는지 안전하게 확인
+		max_height_label.text = "최고 높이: %d m" % int(max_h)
 	
 # ===============================
 # 리스폰 로직
