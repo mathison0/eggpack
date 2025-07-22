@@ -1,12 +1,14 @@
-[gd_scene load_steps=8 format=4 uid="uid://crabbcng6w8ar"]
+[gd_scene load_steps=10 format=4 uid="uid://crabbcng6w8ar"]
 
 [ext_resource type="Script" uid="uid://clj031iki2qx3" path="res://scripts/levels/GameWorld.gd" id="1_84m4g"]
 [ext_resource type="TileSet" uid="uid://d2840lcdgu7bo" path="res://assets/graphics/tiles/ground_special_tileset.tres" id="2_8ghft"]
 [ext_resource type="PackedScene" uid="uid://dsnpygrgnxyoo" path="res://scenes/ui/StatusEffectUI.tscn" id="2_fdut3"]
 [ext_resource type="PackedScene" uid="uid://twknfvlg8etj" path="res://scenes/objects/platform_tile_map.tscn" id="3_3sasu"]
+[ext_resource type="PackedScene" uid="uid://dix3e2p42n76a" path="res://scenes/objects/save_point.tscn" id="4_8ghft"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="4_o8t00"]
 [ext_resource type="PackedScene" uid="uid://db4x7lrv8ecl8" path="res://scenes/objects/FuelPickup.tscn" id="5_ihn80"]
 [ext_resource type="PackedScene" uid="uid://drncxglbgtyi8" path="res://scenes/objects/SwapPortal.tscn" id="8_dhmek"]
+[ext_resource type="PackedScene" path="res://scenes/objects/ending.tscn" id="9_fdut3"]
 
 [node name="GameWorld" type="Node2D"]
 script = ExtResource("1_84m4g")
@@ -47,3 +49,12 @@ position = Vector2(-818, -3678)
 
 [node name="SwapPortal2" parent="." instance=ExtResource("8_dhmek")]
 position = Vector2(582, -3676)
+
+[node name="SavePoint" parent="." instance=ExtResource("4_8ghft")]
+position = Vector2(-574, -1610)
+
+[node name="SavePoint2" parent="." instance=ExtResource("4_8ghft")]
+position = Vector2(520, -1610)
+
+[node name="Ending" parent="." instance=ExtResource("9_fdut3")]
+position = Vector2(31, -4894)
