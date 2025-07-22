@@ -329,7 +329,7 @@ func sync_lives(lives: int):
 # RPC - 세이브 포인트 동기화 및 시각 효과 업데이트
 # ===============================
 @rpc("any_peer", "reliable")
-func update_save_point_rpc(pos: Vector2, active_node_path: NodePath):
+func update_save_point_rpc(pos: Vector2):
 	# 모든 피어에서 세이브 포인트 위치를 업데이트합니다.
 	last_save_point_pos = pos
 	print("Save point updated to: ", last_save_point_pos, " on peer ", multiplayer.get_unique_id())
@@ -364,11 +364,13 @@ func command_egg_destroy_and_spawn_jetpacks(egg_global_pos: Vector2, egg_linear_
 # ================================================================
 #  RPC - 계란후라이 스프라이트 동기화
 # ================================================================
-@rpc("any_peer", "reliable")
+@rpc("any_peer", "reliable", "call_local")
 func change_to_egg_fried_sprite():
 	# 모든 피어에서 달걀 스프라이트를 계란후라이로 변경
 	if egg_fried_texture:
 		egg_main_sprite.texture = egg_fried_texture
+		jetpack_left_visuals_node.visible = false
+		jetpack_right_visuals_node.visible = false
 		print("Egg sprite changed to Fried Egg on peer ", multiplayer.get_unique_id())
 	else:
 		print("Fried Egg Texture is not assigned!")
@@ -538,7 +540,11 @@ func _on_any_body_entered(body: Node2D):
 	# 엔딩 착륙 지점(Area2D)과의 충돌 감지
 	# `Area2D` 타입이면서 EndingLandingZone 레이어에 속하고, 현재 달걀이 호스트의 권한을 가질 때
 	# Note: `body`는 Area2D일 수도, PhysicsBody2D일 수도 있음. Area2D를 기대한다면 `body is Area2D` 확인.
-	if body is Area2D and (body.collision_layer & LAYER_ENDING_LANDING_ZONE) and get_multiplayer_authority() == multiplayer.get_unique_id():
+	#if body is Area2D:
+		#print("Area2D")
+	#if body is StaticBody2D:
+		#print("StaticBody")
+	if body is StaticBody2D and (body.collision_layer & LAYER_ENDING_LANDING_ZONE) and get_multiplayer_authority() == multiplayer.get_unique_id():
 		print("Egg entered the Ending Landing Zone!")
 		change_to_egg_fried_sprite.rpc()
 		set_physics_process(false)
@@ -607,6 +613,8 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				continue
 			elif tile_type == "jump_pad":
 				continue
+				
+				
 			# --- 충돌한 객체가 계란판(SavePoints_NoDamage) 레이어에 있는지 확인 ---
 			# 만약 충돌한 객체가 SavePoints_NoDamage 레이어에 있다면, 데미지 계산을 건너_integrate_forces니다.
 			if collider is not TileMapLayer:	
