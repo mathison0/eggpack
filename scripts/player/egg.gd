@@ -285,9 +285,11 @@ func _physics_process(delta):
 				cloud_slow_down = true
 			
 			if tile_data.get_custom_data("tileType") == "dark_cloud":
-				jamming_timer.start(3)
+				jamming_timer.start(1)
 				GameManager.add_status(GameManager.Status.JAMMED)
-				Timer
+			
+			if tile_data.get_custom_data("tileType") == "purifier":
+				GameManager.remove_status_all()
 		
 		if cloud_slow_down:
 			GameManager.cloud_slow_down(true)
@@ -692,6 +694,7 @@ func apply_damage(amount: int):
 		## 물리적인 움직임을 즉시 멈춥니다.
 		#linear_velocity = Vector2.ZERO
 		#angular_velocity = 0.0
+		GameManager.remove_status_all()
 		
 		#self.mode = 1 # RigidBody2D.BodyMode.STATIC에 해당하는 정수 값
 		## 이 줄을 추가하여 물리 바디를 정적 모드로 변경합니다!

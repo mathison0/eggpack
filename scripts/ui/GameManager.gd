@@ -30,6 +30,11 @@ func remove_status(status_effect: Status):
 		status_effect_changed.emit(active_status)
 		sync_status_update.rpc(active_status)
 
+func remove_status_all():
+	active_status = []
+	status_effect_changed.emit(active_status)		
+	sync_status_update.rpc(active_status)
+
 # 입려 뒤집기 상태 전환
 func toggle_control_swap():
 	if not GameManager.is_host():
