@@ -8,7 +8,7 @@
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="4_o8t00"]
 [ext_resource type="PackedScene" uid="uid://db4x7lrv8ecl8" path="res://scenes/objects/FuelPickup.tscn" id="5_ihn80"]
 [ext_resource type="PackedScene" uid="uid://drncxglbgtyi8" path="res://scenes/objects/SwapPortal.tscn" id="8_dhmek"]
-[ext_resource type="PackedScene" path="res://scenes/objects/ending.tscn" id="9_fdut3"]
+[ext_resource type="PackedScene" uid="uid://dvt5of1kblvrm" path="res://scenes/objects/ending.tscn" id="9_fdut3"]
 
 [node name="GameWorld" type="Node2D"]
 script = ExtResource("1_84m4g")
