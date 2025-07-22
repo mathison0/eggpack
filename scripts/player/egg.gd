@@ -596,7 +596,7 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 		return
 			
 	if state.get_contact_count() > 0:
-		for i in state.get_contact_count():
+		for i in range(state.get_contact_count()):
 			# 타일 타입 가져오기
 			var collider = state.get_contact_collider_object(i)
 			var tile_type = ""
@@ -631,7 +631,6 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				state.linear_velocity = state.linear_velocity * 0.2
 				
 				state.apply_central_impulse(direction.normalized() * power * -1)
-				print(direction)
 				
 				can_use_jump_pad = false
 				get_tree().create_timer(0.1).timeout.connect(func(): can_use_jump_pad = true)
