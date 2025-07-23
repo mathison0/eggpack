@@ -150,3 +150,5 @@ offset_right = 129.0
 offset_bottom = 128.0
 text = "시간: 00:00.000"
 
+[node name="SavePoint5" parent="." instance=ExtResource("4_8ghft")]
+position = Vector2(-417, 54)

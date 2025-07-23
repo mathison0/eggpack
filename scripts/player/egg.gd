@@ -37,6 +37,11 @@ var isInvincible: bool = false
 signal lives_changed(new_lives)
 
 # ================================================================
+# 세이브 포인트 효과
+# ================================================================
+@onready var firework_manager = $"FireworkManager"
+
+# ================================================================
 # 높이 시스템 변수
 # ================================================================
 var current_height: float = 0.0 # 현재 달걀의 높이 (Y 좌표)
@@ -765,9 +770,8 @@ func _on_any_body_entered(body: Node2D):
 					update_height_ui_rpc.rpc(0.0, 0.0)
 
 	# 계란판(세이브 포인트) 충돌 감지
-	# `Area2D`인 계란판이 "save_points" 그룹에 있고, 현재 달걀이 호스트의 권한을 가질 때
+	
 	if body.is_in_group("save_points") and get_multiplayer_authority() == multiplayer.get_unique_id():
-		# StaticBody2D인지 확인하는 조건은 Area2D 그룹화 시에는 필요 없음 (단, 계란판이 StaticBody2D 라면 유지)
 		var entered_carton = body
 		var new_save_pos = entered_carton.global_position
 
@@ -775,6 +779,9 @@ func _on_any_body_entered(body: Node2D):
 			print("Host Egg reached new save point: ", new_save_pos)
 			last_save_point_pos = new_save_pos
 			update_save_point_rpc.rpc(last_save_point_pos)
+			
+			if firework_manager: # firework_manager 노드가 유효한지 확인
+				firework_manager.explode_firework_rpc.rpc(new_save_pos)
 			
 		# --- 리스폰 후 세이브 포인트에 닿았을 때 움직임 활성화 및 기준점 설정 ---
 		# 호스트가 save_points에 닿았을 때 has_touched_ground_after_spawn 활성화

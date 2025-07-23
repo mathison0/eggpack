@@ -1,0 +1,7 @@
+[gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://imy75fk5833j"]
+
+[ext_resource type="Texture2D" uid="uid://dh0qu2i1u71vc" path="res://assets/graphics/objects/glitters.png" id="1_r1r2h"]
+
+[resource]
+atlas = ExtResource("1_r1r2h")
+region = Rect2(0, 0, 64, 64)
