@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://h17puraebncd"]
+[gd_scene load_steps=22 format=3 uid="uid://h17puraebncd"]
 
 [ext_resource type="Script" uid="uid://dk2qjfi0tvwlp" path="res://scripts/player/egg.gd" id="1_eb0g5"]
 [ext_resource type="PhysicsMaterial" uid="uid://cl76u2816118q" path="res://scenes/player/Ice Physics Material.tres" id="2_5w8ku"]
@@ -15,6 +15,7 @@
 [ext_resource type="Material" uid="uid://3vxols8voqan" path="res://scenes/objects/smoke.tres" id="10_803xk"]
 [ext_resource type="Script" path="res://scenes/player/firework_manager.gd" id="13_qys6o"]
 [ext_resource type="Texture2D" uid="uid://cjworhulajivl" path="res://assets/graphics/objects/glitter.png" id="14_s5af0"]
+[ext_resource type="AudioStream" uid="uid://ksgs0wtbwoo2" path="res://assets/audio/rocket.mp3" id="16_rqfb7"]
 
 [sub_resource type="Gradient" id="Gradient_s5af0"]
 offsets = PackedFloat32Array(0.0964467, 0.228426, 0.365482, 0.527919, 0.670051, 0.807107, 0.918782)
@@ -152,3 +153,6 @@ position = Vector2(30, 16)
 emitting = false
 texture = ExtResource("10_0yq5j")
 process_material = ExtResource("10_803xk")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("16_rqfb7")

@@ -4,6 +4,7 @@ extends RigidBody2D
 # ================================================================
 # 플레이어 설정 변수들
 # ================================================================
+@onready var jet_sound = $AudioStreamPlayer2D
 # 제트팩 분사 시 상승하는 힘
 var jetpack_thrust_vertical
 # 제트팩 분사 시 회전시키는 토크 (힘의 단위)
@@ -437,6 +438,12 @@ func _physics_process(delta):
 
 # 클라이언트의 시각 위치 보간
 func _process(delta):
+	if Input.is_action_pressed("ui_left") or Input.is_action_pressed("ui_right"):
+		if not jet_sound.playing:
+			jet_sound.play()
+	else:
+		jet_sound.stop()
+	
 	if get_multiplayer_authority() != multiplayer.get_unique_id():
 		# 클라이언트에서도 has_touched_ground_after_spawn이 false일 때 높이를 0으로 표시
 		if not has_touched_ground_after_spawn:
