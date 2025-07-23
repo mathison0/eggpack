@@ -150,5 +150,3 @@ offset_right = 129.0
 offset_bottom = 128.0
 text = "시간: 00:00.000"
 
-[node name="Ending2" parent="." instance=ExtResource("9_fdut3")]
-position = Vector2(546, -13)
