@@ -79,14 +79,13 @@ fit_content = true
 horizontal_alignment = 1
 selection_enabled = true
 
-[node name="StartGame" type="Button" parent="Client"]
+[node name="StartGame" type="TextureButton" parent="Client"]
 layout_mode = 0
 offset_left = 489.0
 offset_top = 516.0
 offset_right = 598.0
 offset_bottom = 547.0
-text = "게임 시작하기"
-autowrap_mode = 3
+texture_normal = ExtResource("4_ydely")
 
 [node name="Server" type="Node" parent="."]
 script = ExtResource("2_yommx")
