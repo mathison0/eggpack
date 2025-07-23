@@ -1,17 +1,24 @@
-[gd_scene load_steps=19 format=4 uid="uid://dxbh2mtyqxpw6"]
+[gd_scene load_steps=25 format=4 uid="uid://dxbh2mtyqxpw6"]
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
+[ext_resource type="Script" uid="uid://dsktvvma5f6m6" path="res://scenes/network/falling.gd" id="1_rqapo"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
 [ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
 [ext_resource type="Texture2D" uid="uid://fsuudgwuwtli" path="res://assets/graphics/logo_img.png" id="3_yl8f6"]
 [ext_resource type="Texture2D" uid="uid://c8to2igswovm" path="res://assets/graphics/button/game_start.png" id="4_ydely"]
 [ext_resource type="Texture2D" uid="uid://d158w7tnwxpdr" path="res://assets/graphics/button/create_lobby.png" id="5_c7tlm"]
+[ext_resource type="Texture2D" uid="uid://7c1pjb5wce48" path="res://assets/graphics/button/game_start_disabled.png" id="6_u8eul"]
 [ext_resource type="Texture2D" uid="uid://cjk1ous4bmx7m" path="res://assets/graphics/button/join_lobby.png" id="6_uudxv"]
+[ext_resource type="Texture2D" uid="uid://bc4urjg663djr" path="res://assets/graphics/button/game_start_pressed.png" id="6_vvrmm"]
 [ext_resource type="Texture2D" uid="uid://btr8oue7l3ydc" path="res://assets/graphics/egg/egg_img.png" id="7_c7tlm"]
+[ext_resource type="Texture2D" uid="uid://dbpev5dqs7t5t" path="res://assets/graphics/button/create_lobby_disabled.png" id="8_bwcq7"]
 [ext_resource type="Texture2D" uid="uid://dwj0lbegxiecn" path="res://assets/graphics/ending_img.png" id="8_ykn30"]
 [ext_resource type="Texture2D" uid="uid://ce3cmaepi43su" path="res://assets/graphics/egg/egg_fried.png" id="9_q5s15"]
+[ext_resource type="Texture2D" uid="uid://ckbhkiyhxtu7y" path="res://assets/graphics/button/create_lobby_pressed.png" id="9_ujxvn"]
 [ext_resource type="Texture2D" uid="uid://c538tigc16lxe" path="res://assets/graphics/jetpack/jetpack_left_with_long_fire.png" id="10_sytj0"]
+[ext_resource type="Texture2D" uid="uid://dvaocpa822vuv" path="res://assets/graphics/button/join_lobby_disabled.png" id="10_wn8bj"]
 [ext_resource type="Texture2D" uid="uid://dnnphncj63bvr" path="res://assets/graphics/jetpack/jetpack_right_with_long_fire.png" id="11_rqapo"]
+[ext_resource type="Texture2D" uid="uid://boig85mu2xm05" path="res://assets/graphics/button/join_lobby_pressed.png" id="12_q2nos"]
 [ext_resource type="Texture2D" uid="uid://blfh7cot7aqb4" path="res://assets/graphics/egg/egg_shell_left.png" id="13_quyr0"]
 [ext_resource type="Texture2D" uid="uid://dm4g812gc67g7" path="res://assets/graphics/egg/egg_broken.png" id="14_k78r5"]
 [ext_resource type="Texture2D" uid="uid://d2qrsg7gn4pba" path="res://assets/graphics/egg/egg_shell_right.png" id="15_u8eul"]
@@ -26,6 +33,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_rqapo")
 
 [node name="Client" type="Control" parent="."]
 anchors_preset = 0
@@ -63,6 +71,9 @@ text = "서버에 접속하세요!"
 [node name="StartClient" type="TextureButton" parent="Client/ConnectionPanel"]
 layout_mode = 2
 texture_normal = ExtResource("4_ydely")
+texture_pressed = ExtResource("6_vvrmm")
+texture_hover = ExtResource("6_vvrmm")
+texture_disabled = ExtResource("6_u8eul")
 stretch_mode = 5
 
 [node name="LobbyPanel" type="VBoxContainer" parent="Client"]
@@ -76,12 +87,18 @@ offset_bottom = 562.0
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 texture_normal = ExtResource("5_c7tlm")
+texture_pressed = ExtResource("9_ujxvn")
+texture_hover = ExtResource("9_ujxvn")
+texture_disabled = ExtResource("8_bwcq7")
 stretch_mode = 5
 
 [node name="JoinLobby" type="TextureButton" parent="Client/LobbyPanel"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 texture_normal = ExtResource("6_uudxv")
+texture_pressed = ExtResource("12_q2nos")
+texture_hover = ExtResource("12_q2nos")
+texture_disabled = ExtResource("10_wn8bj")
 stretch_mode = 5
 
 [node name="LineEdit" type="LineEdit" parent="Client/LobbyPanel"]
@@ -105,10 +122,13 @@ offset_top = 554.0
 offset_right = 602.0
 offset_bottom = 597.0
 texture_normal = ExtResource("4_ydely")
+texture_pressed = ExtResource("6_vvrmm")
+texture_hover = ExtResource("6_vvrmm")
+texture_disabled = ExtResource("6_u8eul")
 
 [node name="EggImg" type="Sprite2D" parent="Client"]
-position = Vector2(638, 235)
-rotation = -0.523599
+position = Vector2(651, 224)
+rotation = -0.349066
 texture = ExtResource("7_c7tlm")
 
 [node name="EndingImg" type="Sprite2D" parent="Client"]
@@ -120,11 +140,13 @@ position = Vector2(958, 56)
 texture = ExtResource("9_q5s15")
 
 [node name="JetpackLeftWithLongFire" type="Sprite2D" parent="Client"]
-position = Vector2(606, 247)
+position = Vector2(624, 251)
+rotation = -0.349066
 texture = ExtResource("10_sytj0")
 
 [node name="JetpackRightWithLongFire" type="Sprite2D" parent="Client"]
-position = Vector2(672, 247)
+position = Vector2(692, 225)
+rotation = -0.349066
 texture = ExtResource("11_rqapo")
 
 [node name="Server" type="Node" parent="."]
@@ -178,6 +200,10 @@ texture = ExtResource("16_bwcq7")
 position = Vector2(310, 606)
 rotation = -0.951204
 texture = ExtResource("17_wn8bj")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.5
+autostart = true
 
 [connection signal="button_down" from="Client/ConnectionPanel/StartClient" to="Client" method="_on_start_client_button_down"]
 [connection signal="button_down" from="Client/LobbyPanel/CreateLobby" to="Client" method="_on_create_lobby_button_down"]

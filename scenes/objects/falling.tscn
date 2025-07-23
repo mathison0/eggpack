@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://87b675iv0tmd"]
+
+[ext_resource type="Script" uid="uid://414afaemcinj" path="res://scenes/objects/fallingEgg.gd" id="1_hfgo8"]
+[ext_resource type="Texture2D" uid="uid://ce3cmaepi43su" path="res://assets/graphics/egg/egg_fried.png" id="2_6tnaq"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hfgo8"]
+
+[node name="Falling" type="RigidBody2D"]
+script = ExtResource("1_hfgo8")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_6tnaq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_hfgo8")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]

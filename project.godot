@@ -18,6 +18,11 @@ config/features=PackedStringArray("4.4", "Forward Plus")
 
 GameManager="*res://scripts/ui/GameManager.gd"
 
+[display]
+
+window/size/resizable=false
+window/stretch/mode="canvas_items"
+
 [global_group]
 
 Ground=""
