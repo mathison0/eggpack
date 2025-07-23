@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=4 uid="uid://dxbh2mtyqxpw6"]
+[gd_scene load_steps=18 format=4 uid="uid://dxbh2mtyqxpw6"]
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
@@ -10,6 +10,13 @@
 [ext_resource type="Texture2D" uid="uid://btr8oue7l3ydc" path="res://assets/graphics/egg/egg_img.png" id="7_c7tlm"]
 [ext_resource type="Texture2D" uid="uid://dwj0lbegxiecn" path="res://assets/graphics/ending_img.png" id="8_ykn30"]
 [ext_resource type="Texture2D" uid="uid://ce3cmaepi43su" path="res://assets/graphics/egg/egg_fried.png" id="9_q5s15"]
+[ext_resource type="Texture2D" uid="uid://c538tigc16lxe" path="res://assets/graphics/jetpack/jetpack_left_with_long_fire.png" id="10_sytj0"]
+[ext_resource type="Texture2D" uid="uid://dnnphncj63bvr" path="res://assets/graphics/jetpack/jetpack_right_with_long_fire.png" id="11_rqapo"]
+[ext_resource type="Texture2D" uid="uid://blfh7cot7aqb4" path="res://assets/graphics/egg/egg_shell_left.png" id="13_quyr0"]
+[ext_resource type="Texture2D" uid="uid://dm4g812gc67g7" path="res://assets/graphics/egg/egg_broken.png" id="14_k78r5"]
+[ext_resource type="Texture2D" uid="uid://d2qrsg7gn4pba" path="res://assets/graphics/egg/egg_shell_right.png" id="15_u8eul"]
+[ext_resource type="Texture2D" uid="uid://chrh6a6n4dy73" path="res://assets/graphics/jetpack/jetpack_left.png" id="16_bwcq7"]
+[ext_resource type="Texture2D" uid="uid://duuxs78i2y1oi" path="res://assets/graphics/jetpack/jetpack_right.png" id="17_wn8bj"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -95,6 +102,7 @@ texture_normal = ExtResource("4_ydely")
 
 [node name="EggImg" type="Sprite2D" parent="Client"]
 position = Vector2(638, 235)
+rotation = -0.523599
 texture = ExtResource("7_c7tlm")
 
 [node name="EndingImg" type="Sprite2D" parent="Client"]
@@ -104,6 +112,14 @@ texture = ExtResource("8_ykn30")
 [node name="EggFried" type="Sprite2D" parent="Client"]
 position = Vector2(958, 56)
 texture = ExtResource("9_q5s15")
+
+[node name="JetpackLeftWithLongFire" type="Sprite2D" parent="Client"]
+position = Vector2(606, 247)
+texture = ExtResource("10_sytj0")
+
+[node name="JetpackRightWithLongFire" type="Sprite2D" parent="Client"]
+position = Vector2(672, 247)
+texture = ExtResource("11_rqapo")
 
 [node name="Server" type="Node" parent="."]
 script = ExtResource("2_yommx")
@@ -133,6 +149,29 @@ offset_top = 73.0
 offset_right = 1101.0
 offset_bottom = 104.0
 text = "asdf"
+
+[node name="EggShellLeft" type="Sprite2D" parent="."]
+position = Vector2(135, 602)
+texture = ExtResource("13_quyr0")
+
+[node name="EggBroken" type="Sprite2D" parent="."]
+position = Vector2(184, 601)
+rotation = -0.872665
+texture = ExtResource("14_k78r5")
+
+[node name="EggShellRight" type="Sprite2D" parent="."]
+position = Vector2(247, 609)
+texture = ExtResource("15_u8eul")
+
+[node name="JetpackLeft" type="Sprite2D" parent="."]
+position = Vector2(87, 561)
+rotation = -0.593412
+texture = ExtResource("16_bwcq7")
+
+[node name="JetpackRight" type="Sprite2D" parent="."]
+position = Vector2(310, 606)
+rotation = -0.951204
+texture = ExtResource("17_wn8bj")
 
 [connection signal="button_down" from="Client/ConnectionPanel/StartClient" to="Client" method="_on_start_client_button_down"]
 [connection signal="button_down" from="Client/LobbyPanel/CreateLobby" to="Client" method="_on_create_lobby_button_down"]
