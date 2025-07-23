@@ -479,6 +479,12 @@ texture_region_size = Vector2i(64, 64)
 25:0/0/custom_data_0 = "purifier"
 25:1/0 = 0
 25:1/0/custom_data_0 = "purifier"
+26:0/0 = 0
+26:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(32, -32, 32, 32, -32, 32)
+26:0/0/custom_data_0 = "spike"
+27:0/0 = 0
+27:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-32, 32, -32, -32, 32, -32)
+27:0/0/custom_data_0 = "spike"
 
 [resource]
 tile_size = Vector2i(64, 64)
