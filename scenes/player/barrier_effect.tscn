@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://d4i1yi4ixbfbc"]
+
+[ext_resource type="Texture2D" uid="uid://bosjxqipdb53y" path="res://assets/graphics/icons/barrier_effect.png" id="1_ik46v"]
+[ext_resource type="Script" uid="uid://t56jdufl5hc8" path="res://scenes/player/barrier_effect.gd" id="1_t2uyx"]
+[ext_resource type="Texture2D" uid="uid://bu4wxp4bq3g6e" path="res://assets/graphics/icons/barrier_effect_static.png" id="2_o7eih"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o7eih"]
+atlas = ExtResource("1_ik46v")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_t2uyx"]
+atlas = ExtResource("1_ik46v")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_i6tyd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o7eih")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_t2uyx")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="BarrierEffect" type="Node2D"]
+visible = false
+script = ExtResource("1_t2uyx")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_i6tyd")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_o7eih")
