@@ -21,6 +21,8 @@ enum Message {
 @onready var create_lobby = $LobbyPanel/CreateLobby
 @onready var join_lobby = $LobbyPanel/JoinLobby
 
+@onready var main_menu_bgm = $BGMPlayer
+
 var peer = WebSocketMultiplayerPeer.new()
 var id = 0
 # 연결을 직접적으로 다룸
@@ -218,6 +220,10 @@ func start_game_scene():
 func _on_start_game_button_down() -> void:
 	if GameManager.my_id != GameManager.host_id:
 		return
+		
+	if main_menu_bgm and main_menu_bgm.playing:
+		main_menu_bgm.stop() # 메인 메뉴 BGM을 정지시킵니다.
+		
 	# 나 자신(호스트)을 포함한 모든 연결된 클라이언트에게 게임을 시작하라고 알립니다.
 	start_game_scene.rpc()
 
