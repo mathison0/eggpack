@@ -4,7 +4,7 @@
 [ext_resource type="TileSet" uid="uid://d2840lcdgu7bo" path="res://assets/graphics/tiles/ground_special_tileset.tres" id="2_8ghft"]
 [ext_resource type="PackedScene" uid="uid://dsnpygrgnxyoo" path="res://scenes/ui/StatusEffectUI.tscn" id="2_fdut3"]
 [ext_resource type="PackedScene" uid="uid://twknfvlg8etj" path="res://scenes/objects/platform_tile_map.tscn" id="3_3sasu"]
-[ext_resource type="Script" path="res://scripts/ui/screen_effects_manager.gd" id="3_vxsil"]
+[ext_resource type="Script" uid="uid://cv28135gdjh7f" path="res://scripts/ui/screen_effects_manager.gd" id="3_vxsil"]
 [ext_resource type="PackedScene" uid="uid://dix3e2p42n76a" path="res://scenes/objects/save_point.tscn" id="4_8ghft"]
 [ext_resource type="Texture2D" uid="uid://cxcurw4e0f8hh" path="res://assets/graphics/icons/cracked_edge.png" id="4_fy6ti"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="4_o8t00"]
