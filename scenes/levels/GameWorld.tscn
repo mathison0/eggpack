@@ -108,8 +108,8 @@ position = Vector2(576, -6848)
 [node name="FuelPickup20" parent="." instance=ExtResource("5_ihn80")]
 position = Vector2(1538, -7046)
 
-[node name="Ending" parent="." instance=ExtResource("9_fdut3")]
-position = Vector2(-495, -7969)
+[node name="EndingSceneRoot" parent="." instance=ExtResource("9_fdut3")]
+position = Vector2(-496, -7968)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

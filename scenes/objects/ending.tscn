@@ -1,19 +1,31 @@
-[gd_scene load_steps=3 format=3 uid="uid://dvt5of1kblvrm"]
+[gd_scene load_steps=4 format=3 uid="uid://dvt5of1kblvrm"]
 
 [ext_resource type="Texture2D" uid="uid://dwj0lbegxiecn" path="res://assets/graphics/ending_img.png" id="1_fabvv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_drrvi"]
 size = Vector2(82, 2.33333)
 
-[node name="Ending" type="StaticBody2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fabvv"]
+size = Vector2(133, 11)
+
+[node name="EndingSceneRoot" type="Node2D"]
+
+[node name="Ending" type="StaticBody2D" parent="."]
 z_index = 620
 scale = Vector2(1.5, 1.5)
 collision_layer = 32
 collision_mask = 0
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="Ending"]
 texture = ExtResource("1_fabvv")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ending"]
 position = Vector2(-32, -7.33333)
 shape = SubResource("RectangleShape2D_drrvi")
+
+[node name="BottomBlocker" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomBlocker"]
+z_index = 840
+position = Vector2(-44.5, -1)
+shape = SubResource("RectangleShape2D_fabvv")

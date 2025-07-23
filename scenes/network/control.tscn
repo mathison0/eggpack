@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=4 uid="uid://dxbh2mtyqxpw6"]
+[gd_scene load_steps=8 format=4 uid="uid://dxbh2mtyqxpw6"]
 
 [ext_resource type="Script" uid="uid://d06x2fy40t3wt" path="res://scripts/network/Client.gd" id="1_4c5f7"]
 [ext_resource type="TileSet" uid="uid://dig1uyv8vx30" path="res://assets/graphics/tiles/ground_background_tileset.tres" id="2_05ykq"]
-[ext_resource type="Texture2D" uid="uid://kgcpogmvdau7" path="res://assets/graphics/logo.png" id="2_yl8f6"]
 [ext_resource type="Script" uid="uid://b2q5qys3f5luc" path="res://scripts/network/Server.gd" id="2_yommx"]
+[ext_resource type="Texture2D" uid="uid://fsuudgwuwtli" path="res://assets/graphics/logo_img.png" id="3_yl8f6"]
+[ext_resource type="Texture2D" uid="uid://c8to2igswovm" path="res://assets/graphics/button/game_start.png" id="4_ydely"]
+[ext_resource type="Texture2D" uid="uid://d158w7tnwxpdr" path="res://assets/graphics/button/create_lobby.png" id="5_c7tlm"]
+[ext_resource type="Texture2D" uid="uid://cjk1ous4bmx7m" path="res://assets/graphics/button/join_lobby.png" id="6_uudxv"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -28,7 +31,7 @@ offset_top = 102.0
 offset_right = 1547.0
 offset_bottom = 1126.0
 scale = Vector2(0.250932, 0.190708)
-texture = ExtResource("2_yl8f6")
+texture = ExtResource("3_yl8f6")
 
 [node name="ConnectionPanel" type="VBoxContainer" parent="Client"]
 layout_mode = 0
@@ -41,9 +44,9 @@ offset_bottom = 333.0
 layout_mode = 2
 text = "서버에 접속하세요!"
 
-[node name="StartClient" type="Button" parent="Client/ConnectionPanel"]
+[node name="StartClient" type="TextureButton" parent="Client/ConnectionPanel"]
 layout_mode = 2
-text = "게임 시작하기"
+texture_normal = ExtResource("4_ydely")
 
 [node name="LobbyPanel" type="VBoxContainer" parent="Client"]
 layout_mode = 0
@@ -52,17 +55,15 @@ offset_top = 354.0
 offset_right = 791.0
 offset_bottom = 562.0
 
-[node name="CreateLobby" type="Button" parent="Client/LobbyPanel"]
+[node name="CreateLobby" type="TextureButton" parent="Client/LobbyPanel"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-text = "로비 생성하기
-"
+texture_normal = ExtResource("5_c7tlm")
 
-[node name="JoinLobby" type="Button" parent="Client/LobbyPanel"]
+[node name="JoinLobby" type="TextureButton" parent="Client/LobbyPanel"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-text = "코드로 로비 참가하기
-"
+texture_normal = ExtResource("6_uudxv")
 
 [node name="LineEdit" type="LineEdit" parent="Client/LobbyPanel"]
 layout_mode = 2
