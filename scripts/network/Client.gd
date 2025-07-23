@@ -46,8 +46,8 @@ func RTCPeerConnected(id):
 	join_lobby.disabled = true
 	if GameManager.is_host():
 		start_game_button.disabled = false
-	else:
-		start_game_button.text = "호스트만 게임을 시작할 수 있습니다!"
+	#else:
+		#start_game_button.text = "호스트만 게임을 시작할 수 있습니다!"
 
 func RTCPeerDisconnected(id):
 	print("RTC peer disconnected " + str(id))

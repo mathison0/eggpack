@@ -1,5 +1,4 @@
-
-[gd_scene load_steps=20 format=3 uid="uid://h17puraebncd"]
+[gd_scene load_steps=21 format=3 uid="uid://h17puraebncd"]
 
 [ext_resource type="Script" uid="uid://dk2qjfi0tvwlp" path="res://scripts/player/egg.gd" id="1_eb0g5"]
 [ext_resource type="PhysicsMaterial" uid="uid://cl76u2816118q" path="res://scenes/player/Ice Physics Material.tres" id="2_5w8ku"]
@@ -11,7 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://ro4w1ex448tq" path="res://scenes/player/EggShell_left.tscn" id="3_nrcqi"]
 [ext_resource type="Texture2D" uid="uid://duuxs78i2y1oi" path="res://assets/graphics/jetpack/jetpack_right.png" id="4_5w8ku"]
 [ext_resource type="PackedScene" uid="uid://baf70igu7riqr" path="res://scenes/player/EggShell_Right.tscn" id="4_803xk"]
-[ext_resource type="Script" uid="uid://dmuh6b8bxpi53" path="res://scripts/ui/camera2D.gd" id="8_cx0ue"]
+[ext_resource type="Script" path="res://scripts/ui/camera2D.gd" id="8_cx0ue"]
 [ext_resource type="Texture2D" uid="uid://bbetmpxidjteu" path="res://assets/graphics/objects/smoke.png" id="10_0yq5j"]
 [ext_resource type="Material" uid="uid://3vxols8voqan" path="res://scenes/objects/smoke.tres" id="10_803xk"]
 [ext_resource type="Script" uid="uid://cyfwso2jlpnle" path="res://scenes/player/firework_manager.gd" id="13_qys6o"]
@@ -72,7 +71,6 @@ jetpack_left_broken_scene = ExtResource("2_58t0v")
 jetpack_right_broken_scene = ExtResource("3_k2d6k")
 ice_physics_material = ExtResource("2_5w8ku")
 
-
 [node name="FireworkManager" type="Node2D" parent="."]
 script = ExtResource("13_qys6o")
 
@@ -87,7 +85,6 @@ process_material = SubResource("ParticleProcessMaterial_yw2h6")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("8_cx0ue")
-
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_eb0g5")

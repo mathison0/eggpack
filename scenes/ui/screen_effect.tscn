@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cd45yo7tpvqqc"]
+[gd_scene load_steps=0 format=3 uid="uid://cd45yo7tpvqqc"]
 
 [node name="ScreenEffect" type="TextureRect"]
 offset_right = 40.0
