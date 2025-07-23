@@ -124,6 +124,9 @@ var current_right_jetpack_fuel: float
 @onready var jetpack_left_visuals_node = $Visuals/JetpackLeft
 @onready var jetpack_right_visuals_node = $Visuals/JetpackRight
 
+@onready var left_jetpack_particles: GPUParticles2D = $Visuals/JetpackLeft/LeftParticles
+@onready var right_jetpack_particles: GPUParticles2D = $Visuals/JetpackRight/RightParticles
+
 @onready var jamming_timer = $JammingTimer
 
 @export var interpolation_speed = 15.0
@@ -435,27 +438,29 @@ func set_client_jetpack_input(is_active: bool):
 	client_right_jetpack_active = is_active
 
 # 호스트(P1)가 호출하며, 모든 플레이어(호스트 포함)에게서 실행됩니다.
-@rpc("any_peer", "reliable")
+@rpc("any_peer", "reliable", "call_local")
 func sync_visuals(left_fuel: float, right_fuel: float, left_on: bool, right_on: bool):
 	# 호스트가 아닌 클라이언트들만 이 RPC를 통해 상태를 업데이트합니다.
 	# (호스트는 이미 `update_visuals_and_broadcast`에서 직접 로컬 함수를 호출했습니다)
-	if get_multiplayer_authority() != multiplayer.get_unique_id(): # 현재 노드의 권한을 직접 확인
-		# 연료 상태 업데이트
-		current_left_jetpack_fuel = left_fuel
-		current_right_jetpack_fuel = right_fuel
-		update_fuel_bars()
-		
-		# 왼쪽 제트팩 시각 효과 업데이트
-		if left_on:
-			_update_jetpack_sprite(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
-		else:
-			_reset_jetpack_state(jetpack_left_sprite, left_jetpack_timer, jetpack_left_idle_texture)
-		
-		# 오른쪽 제트팩 시각 효과 업데이트
-		if right_on:
-			_update_jetpack_sprite(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
-		else:
-			_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
+	# 연료 상태 업데이트
+	current_left_jetpack_fuel = left_fuel
+	current_right_jetpack_fuel = right_fuel
+	update_fuel_bars()
+	
+	# 왼쪽 제트팩 시각 효과 업데이트
+	if left_on:
+		left_jetpack_particles.emitting = true
+		_update_jetpack_sprite(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
+	else:
+		left_jetpack_particles.emitting = false
+		_reset_jetpack_state(jetpack_left_sprite, left_jetpack_timer, jetpack_left_idle_texture)
+	
+	if right_on:
+		right_jetpack_particles.emitting = true
+		_update_jetpack_sprite(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
+	else:
+		right_jetpack_particles.emitting = false
+		_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
 
 # ===============================
 # RPC - 목숨 동기화
@@ -603,19 +608,6 @@ func respawn_egg_local():
 
 # 호스트가 자신의 화면을 업데이트하고, 모든 클라이언트에게 상태를 전송하는 함수
 func update_visuals_and_broadcast(left_fuel: float, right_fuel: float, left_on: bool, right_on: bool):
-	# 1. 호스트 자신의 화면을 즉시 업데이트
-	update_fuel_bars()
-	if left_on:
-		_update_jetpack_sprite(jetpack_left_sprite, left_jetpack_timer, left_jetpack_anim_state, jetpack_left_fire_texture, jetpack_left_long_fire_texture)
-	else:
-		_reset_jetpack_state(jetpack_left_sprite, left_jetpack_timer, jetpack_left_idle_texture)
-	
-	if right_on:
-		_update_jetpack_sprite(jetpack_right_sprite, right_jetpack_timer, right_jetpack_anim_state, jetpack_right_fire_texture, jetpack_right_long_fire_texture)
-	else:
-		_reset_jetpack_state(jetpack_right_sprite, right_jetpack_timer, jetpack_right_idle_texture)
-		
-	# 2. 모든 클라이언트에게 상태를 동기화하라고 알림
 	sync_visuals.rpc(left_fuel, right_fuel, left_on, right_on)
 
 # 제트팩 추진력을 적용하는 함수 (호스트에서만 호출)

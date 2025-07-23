@@ -109,9 +109,7 @@ position = Vector2(576, -6848)
 position = Vector2(1538, -7046)
 
 [node name="Ending" parent="." instance=ExtResource("9_fdut3")]
-
 position = Vector2(-495, -7969)
-
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -151,4 +149,3 @@ offset_top = 105.0
 offset_right = 129.0
 offset_bottom = 128.0
 text = "시간: 00:00.000"
->>>>>>> feature/HUD
