@@ -136,6 +136,15 @@ var current_right_jetpack_fuel: float
 
 @export var interpolation_speed = 15.0
 
+var current_item: String = ""
+@onready var item_display = get_tree().get_root().find_child("StatusEffectUi", true, false)
+
+@export var barrier_effect_scene: PackedScene = preload("res://scenes/player/barrier_effect.tscn")
+@export var barrier_duration: float = 4.0
+@export var barrier_blink_duration: float = 2.0
+var is_barrier_active: bool = false
+var barrier_effect_instance: Node2D
+@onready var barrier_timer: Timer = $BarrierTimer
 
 # ================================================================
 # 내부 상태 변수
@@ -210,6 +219,7 @@ func _ready():
 	body_exited.connect(_on_body_exited)
 	
 	jamming_timer.timeout.connect(_on_jamming_timer_timeout)
+	barrier_timer.timeout.connect(_on_barrier_timer_timeout)
 	
 	# 목숨 초기화 및 초기 달걀 스프라이트 설정
 	current_lives = max_lives
@@ -293,6 +303,9 @@ func _physics_process(delta):
 		var left_key_pressed = Input.is_action_pressed("ui_left")
 		# 클라이언트(P2)의 입력은 RPC를 통해 수신한 `client_right_jetpack_active` 변수를 사용합니다.
 		var right_key_pressed = client_right_jetpack_active
+		
+		if Input.is_action_just_pressed("use_item"):
+			use_current_item()
 		
 		var left_jetpack_fire = false
 		var right_jetpack_fire = true
@@ -410,6 +423,8 @@ func _physics_process(delta):
 		# 클라이언트도 바닥에 닿기 전까지는 제트팩 입력을 보내지 않음
 		if has_touched_ground_after_spawn: # <--- 이 조건 추가
 			var right_pressed = Input.is_action_pressed("ui_right")
+			if Input.is_action_just_pressed("use_item"):
+				request_use_item_rpc.rpc()
 			# 입력 상태가 이전 프레임과 달라졌을 때만 RPC를 호출하여 네트워크 트래픽을 줄입니다.
 			if right_pressed != _client_previous_input_state:
 				# rpc_id(1, ...)은 ID가 1인 피어(호스트)에게만 RPC를 보냅니다.
@@ -869,6 +884,8 @@ func _integrate_forces(state: PhysicsDirectBodyState2D):
 				
 				state.apply_central_impulse(direction.normalized() * power * -1)
 				
+				state.angular_velocity = state.angular_velocity * 0.2
+				
 				can_use_jump_pad = false
 				get_tree().create_timer(0.1).timeout.connect(func(): can_use_jump_pad = true)
 				
@@ -958,3 +975,66 @@ func refill_fuel():
 # 재밍
 func _on_jamming_timer_timeout():
 	GameManager.remove_status(GameManager.Status.JAMMED)
+
+# 아이템
+func collect_item(item_type: String) -> bool:
+	if not GameManager.is_host():
+		return false
+	
+	if current_item != "":
+		return false
+	
+	current_item = item_type
+	update_item_ui_rpc.rpc(current_item)
+	return true
+
+@rpc("any_peer","reliable")
+func request_use_item_rpc():
+	if GameManager.is_host():
+		use_current_item()
+
+func use_current_item():
+	if current_item == "" or current_lives <= 0:
+		return
+	
+	match current_item:
+		"Barrier":
+			if is_barrier_active:
+				return
+			is_barrier_active = true
+			isInvincible = true
+			
+			barrier_effect.rpc()
+	
+	current_item = ""
+	update_item_ui_rpc.rpc(current_item)
+
+@rpc("any_peer","reliable","call_local")
+func barrier_effect():
+	barrier_effect_instance = barrier_effect_scene.instantiate()
+	add_child(barrier_effect_instance)
+	barrier_effect_instance.global_position = global_position
+	barrier_effect_instance.visible = true
+	
+	barrier_timer.wait_time = barrier_duration
+	barrier_timer.one_shot = true
+	barrier_timer.start()
+
+func _on_barrier_timer_timeout():
+	barrier_effect_instance.start_blink()
+	get_tree().create_timer(2).timeout.connect(_disable_barrier)
+	
+func _disable_barrier():
+	isInvincible = false
+	is_barrier_active = false
+	barrier_timer.stop()
+	barrier_effect_instance.queue_free()
+	barrier_effect_instance = null
+
+@rpc("any_peer","reliable","call_local")
+func update_item_ui_rpc(item_name: String):
+	if not is_instance_valid(item_display):
+		return
+	
+	item_display.update_item_display(item_name)
+		

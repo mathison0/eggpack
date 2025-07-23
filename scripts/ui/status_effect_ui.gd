@@ -1,6 +1,7 @@
-extends MarginContainer
+extends VBoxContainer
 
-@onready var icon_container: HBoxContainer = $IconContainer
+@onready var icon_container: VBoxContainer = $MarginContainer/IconContainer
+@onready var item_icon_container: TextureRect = $ItemIconContainer
 
 const ICON_SHEET = preload("res://assets/graphics/icons/Status.png")
 const ICON_SIZE = 64
@@ -11,6 +12,11 @@ func _ready():
 	_setup_status_icons()
 	
 	GameManager.status_effect_changed.connect(update_display)
+
+const ITEM_TEXTURES = {
+	"Empty":preload("res://assets/graphics/icons/item_empty_icon.png"),
+	"Barrier": preload("res://assets/graphics/icons/item_barrier_icon.png")
+}
 	
 func _setup_status_icons():
 	STATUS_ICONS[GameManager.Status.CONTROL_SWAPPED] = _match_atlas(0, 0)
@@ -34,3 +40,13 @@ func update_display(active_status: Array):
 			new_icon.expand_mode = TextureRect.EXPAND_KEEP_SIZE
 			new_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			icon_container.add_child(new_icon)
+
+func update_item_display(item_name: String):
+	if item_name == "":
+		item_icon_container.texture = ITEM_TEXTURES["Empty"]
+	else:
+		if ITEM_TEXTURES.has(item_name):
+			item_icon_container.texture = ITEM_TEXTURES[item_name]
+		else:
+			item_icon_container.texture = ITEM_TEXTURES["Empty"]
+			

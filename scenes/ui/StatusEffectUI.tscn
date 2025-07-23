@@ -1,10 +1,28 @@
-[gd_scene load_steps=2 format=3 uid="uid://dsnpygrgnxyoo"]
+[gd_scene load_steps=3 format=3 uid="uid://dsnpygrgnxyoo"]
 
 [ext_resource type="Script" uid="uid://bqhcd0ra8iht6" path="res://scripts/ui/status_effect_ui.gd" id="1_svb1f"]
+[ext_resource type="Texture2D" uid="uid://dy00fsdfiw4f4" path="res://assets/graphics/icons/item_empty_icon.png" id="2_kybei"]
 
-[node name="StatusEffectUi" type="MarginContainer"]
+[node name="StatusEffectUi" type="VBoxContainer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_bottom = 4.0
+grow_horizontal = 0
+alignment = 2
 script = ExtResource("1_svb1f")
 
-[node name="IconContainer" type="HBoxContainer" parent="."]
+[node name="ItemIconContainer" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
-theme_override_constants/separation = 10
+texture = ExtResource("2_kybei")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+
+[node name="IconContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
