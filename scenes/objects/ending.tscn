@@ -3,11 +3,10 @@
 [ext_resource type="Texture2D" uid="uid://dwj0lbegxiecn" path="res://assets/graphics/ending_img.png" id="1_fabvv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_drrvi"]
-size = Vector2(82, 6)
+size = Vector2(82, 2.33333)
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_fabvv"]
-a = Vector2(-394.333, 12)
-b = Vector2(-311.667, 12)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fabvv"]
+size = Vector2(87.3333, 3.33333)
 
 [node name="Ending" type="StaticBody2D"]
 z_index = 620
@@ -19,12 +18,9 @@ collision_mask = 0
 texture = ExtResource("1_fabvv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-31.6667, -4)
+position = Vector2(-32, -7.33333)
 shape = SubResource("RectangleShape2D_drrvi")
 
-[node name="LandingZone" type="Area2D" parent="."]
-collision_layer = 32
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LandingZone"]
-position = Vector2(321, -22)
-shape = SubResource("SegmentShape2D_fabvv")
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="."]
+position = Vector2(-31, -1.66667)
+shape = SubResource("RectangleShape2D_fabvv")

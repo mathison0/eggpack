@@ -39,13 +39,10 @@ linear_damp = 0.3
 angular_damp = 0.1
 script = ExtResource("1_eb0g5")
 jetpack_torque_amount = 250.0
-
 default_spawn_pos = Vector2(0, 0)
-
 egg_broken_texture = ExtResource("2_lo5bx")
 egg_shell_left_scene = ExtResource("3_nrcqi")
 egg_shell_right_scene = ExtResource("4_803xk")
-
 jetpack_left_broken_scene = ExtResource("2_58t0v")
 jetpack_right_broken_scene = ExtResource("3_k2d6k")
 ice_physics_material = ExtResource("2_5w8ku")
@@ -104,3 +101,5 @@ fill_mode = 3
 show_percentage = false
 
 [node name="Camera2D" type="Camera2D" parent="Visuals"]
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
